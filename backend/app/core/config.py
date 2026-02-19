@@ -5,6 +5,9 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     DATABASE_URL: str = "postgresql+asyncpg://aiauser:aiapassword@localhost:5432/aiadatabase"
 
+    AZURE_FORM_RECOGNIZER_ENDPOINT: str = ""
+    AZURE_FORM_RECOGNIZER_KEY: str = ""
+
     class Config:
         env_file = ".env"
 

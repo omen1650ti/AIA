@@ -14,6 +14,8 @@ httpx = "*"
 sqlalchemy = "*"
 asyncpg = "*"
 alembic = "*"
+azure-ai-formrecognizer = "*"
+python-multipart = "*"
 
 [dev-packages]
 
