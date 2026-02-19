@@ -4,12 +4,16 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+psycopg2 = "*"
 fastapi = "*"
 uvicorn = {extras = ["standard"], version = "*"}
 pydantic = "*"
 pydantic-settings = "*"
 python-dotenv = "*"
 httpx = "*"
+sqlalchemy = "*"
+asyncpg = "*"
+alembic = "*"
 
 [dev-packages]
 
