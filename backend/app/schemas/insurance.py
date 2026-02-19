@@ -10,6 +10,11 @@ class RiderBase(BaseModel):
 class RiderCreate(RiderBase):
     pass
 
+class RiderUpdate(BaseModel):
+    rider_name: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = None
+
 class Rider(RiderBase):
     id: int
     plan_id: int
@@ -22,6 +27,11 @@ class PlanBase(BaseModel):
 
 class PlanCreate(PlanBase):
     insurance_provider_id: int
+
+class PlanUpdate(BaseModel):
+    details: Optional[str] = None
+    base_price: Optional[float] = None
+    insurance_provider_id: Optional[int] = None
 
 class Plan(PlanBase):
     id: int
@@ -36,6 +46,10 @@ class ProviderBase(BaseModel):
 
 class ProviderCreate(ProviderBase):
     pass
+
+class ProviderUpdate(BaseModel):
+    name: Optional[str] = None
+    additional_details: Optional[Dict[str, Any]] = None
 
 class Provider(ProviderBase):
     id: int
