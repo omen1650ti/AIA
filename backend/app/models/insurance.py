@@ -33,6 +33,8 @@ class Plan(Base):
         index=True
     )
 
+    name: Mapped[Optional[str]] = mapped_column(String, index=True)
+
     insurance_provider_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("insurance_providers.id")

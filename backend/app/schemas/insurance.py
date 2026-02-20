@@ -21,6 +21,7 @@ class Rider(RiderBase):
 
 # --- Plan Schemas ---
 class PlanBase(BaseModel):
+    name: Optional[str] = None
     details: Optional[str] = None
     base_price: float
     jsonb_data: Optional[Dict[str, Any]] = None

@@ -67,6 +67,18 @@ async def get_plan_by_id(
     if not plan:
         raise HTTPException(status_code=404, detail="Plan not found")
     return plan
+
+@router.get("/name/{name}", response_model=PlanSchema)
+async def get_plan_by_name(
+    name: str,
+    db: AsyncSession = Depends(get_db)
+):
+    query = select(Plan).options(selectinload(Plan.riders)).where(Plan.name == name)
+    result = await db.execute(query)
+    plan = result.scalars().first()
+    if not plan:
+        raise HTTPException(status_code=404, detail="Plan not found")
+    return plan
 @router.get("/id/{plan_id}/riders", response_model=List[RiderSchema])
 async def get_plan_riders(
     plan_id: uuid.UUID,
