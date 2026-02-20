@@ -1,0 +1,65 @@
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Outlet } from "react-router-dom";
+import ChatPage from "../pages/ChatPage";
+import InsurancePage from "../pages/InsurancePage";
+
+const MainLayout = () => {
+  const [policies, setPolicies] = useState([]);
+  const [filters, setFilters] = useState({
+    type: "",
+    maxPremium: "",
+    age: "",
+    minCoverage: "",
+    search: "",
+    sortBy: "",
+  });
+
+  const fetchPolicies = async (activeFilters) => {
+    try {
+      const params = {};
+      if (activeFilters.type) params.type = activeFilters.type;
+      if (activeFilters.maxPremium)
+        params.maxPremium = activeFilters.maxPremium;
+      if (activeFilters.age) params.age = activeFilters.age;
+      if (activeFilters.minCoverage)
+        params.minCoverage = activeFilters.minCoverage;
+      if (activeFilters.search) params.search = activeFilters.search;
+      if (activeFilters.sortBy) params.sortBy = activeFilters.sortBy;
+
+      const res = await axios.get("/api/policies", { params });
+      setPolicies(res.data);
+    } catch (err) {
+      console.error("Error fetching policies", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchPolicies(filters);
+  }, [filters]);
+
+  const updateFilter = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
+  };
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-slate-50">
+      <div className="flex-[3] border-r border-slate-200 flex flex-col overflow-hidden">
+        <InsurancePage 
+          policies={policies} 
+          filters={filters} 
+          updateFilter={updateFilter} 
+          setFilters={setFilters} 
+        />
+        {/* Or if using Outlet for future routes */}
+        {/* <Outlet context={{ policies, filters, updateFilter, setFilters }} /> */}
+      </div>
+      <div className="flex-1 flex flex-col bg-white overflow-hidden">
+        <ChatPage filters={filters} setFilters={setFilters} />
+      </div>
+    </div>
+  );
+};
+
+export default MainLayout;
