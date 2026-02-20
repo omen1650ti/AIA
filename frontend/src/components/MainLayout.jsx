@@ -48,11 +48,7 @@ const MainLayout = () => {
     <div className="flex h-screen overflow-hidden bg-slate-50">
       {/* LEFT PANEL (dynamic page) */}
       <div className="flex-[3] border-r border-slate-200 flex flex-col overflow-hidden">
-        <NavBar
-          filters={filters}
-          updateFilter={updateFilter}
-          setFilters={setFilters}
-        />
+        <NavBar />
         <div className="flex-1 overflow-auto py-8">
           <PageHeader />
           <Outlet context={{ policies, filters, updateFilter, setFilters }} />
