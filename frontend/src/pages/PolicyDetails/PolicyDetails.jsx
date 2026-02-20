@@ -65,7 +65,7 @@ const PolicyDetails = () => {
   return (
     <div
       style={{
-        padding: "0 32px 32px",
+        padding: "32px 32px 32px",
         background: S.bg,
         minHeight: "100%",
         fontFamily: S.font,
