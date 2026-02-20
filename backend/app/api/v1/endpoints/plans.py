@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, cast, Integer, Float, Boolean, desc, asc, String as SQLString
+from sqlalchemy import select, desc, asc
 from sqlalchemy.orm import selectinload
 from typing import List, Optional
 import uuid
@@ -48,28 +48,28 @@ async def get_all_plans(
         query = query.where(Plan.name.ilike(f"%{plan_name}%"))
     
     if room_rent_type:
-        query = query.where(Plan.jsonb_data['room_rent_type'].astext == room_rent_type)
+        query = query.where(Plan.jsonb_data['room_rent_type'].as_string() == room_rent_type)
     
     if min_waiting_period is not None:
-        query = query.where(cast(Plan.jsonb_data['existing_waiting_period_yrs'].astext, Integer) >= min_waiting_period)
+        query = query.where(Plan.jsonb_data['existing_waiting_period_yrs'].as_integer() >= min_waiting_period)
     if max_waiting_period is not None:
-        query = query.where(cast(Plan.jsonb_data['existing_waiting_period_yrs'].astext, Integer) <= max_waiting_period)
+        query = query.where(Plan.jsonb_data['existing_waiting_period_yrs'].as_integer() <= max_waiting_period)
         
     if min_ncb is not None:
-        query = query.where(cast(Plan.jsonb_data['ncb_percent_per_year'].astext, Float) >= min_ncb)
+        query = query.where(Plan.jsonb_data['ncb_percent_per_year'].as_float() >= min_ncb)
     if max_ncb is not None:
-        query = query.where(cast(Plan.jsonb_data['ncb_percent_per_year'].astext, Float) <= max_ncb)
+        query = query.where(Plan.jsonb_data['ncb_percent_per_year'].as_float() <= max_ncb)
 
     if min_child_age is not None:
-        query = query.where(cast(Plan.jsonb_data['max_child_age'].astext, Integer) >= min_child_age)
+        query = query.where(Plan.jsonb_data['max_child_age'].as_integer() >= min_child_age)
     if max_child_age is not None:
-        query = query.where(cast(Plan.jsonb_data['max_child_age'].astext, Integer) <= max_child_age)
+        query = query.where(Plan.jsonb_data['max_child_age'].as_integer() <= max_child_age)
 
     if min_claim_settlement is not None:
-        query = query.where(cast(Plan.jsonb_data['claim_settlement_ratio_percent'].astext, Float) >= min_claim_settlement)
+        query = query.where(Plan.jsonb_data['claim_settlement_ratio_percent'].as_float() >= min_claim_settlement)
 
     if min_cashless_hospitals is not None:
-        query = query.where(cast(Plan.jsonb_data['cashless_hospitals'].astext, Integer) >= min_cashless_hospitals)
+        query = query.where(Plan.jsonb_data['cashless_hospitals'].as_integer() >= min_cashless_hospitals)
 
     # Features Filtering
     feature_map = {
@@ -84,23 +84,26 @@ async def get_all_plans(
         "daily_cash_allowance": daily_cash_allowance,
         "animal_bite_vaccination": animal_bite_vaccination
     }
+    
     for feature_key, val in feature_map.items():
         if val is not None:
-            query = query.where(cast(Plan.jsonb_data['features'][feature_key].astext, Boolean) == val)
+            query = query.where(
+                Plan.jsonb_data['features'][feature_key].as_boolean() == val
+            )
 
     # --- Sorting ---
     if sort_by:
         sort_attr = None
         if sort_by == "waiting_period":
-            sort_attr = cast(Plan.jsonb_data['existing_waiting_period_yrs'].astext, Integer)
+            sort_attr = Plan.jsonb_data['existing_waiting_period_yrs'].as_integer()
         elif sort_by == "ncb":
-            sort_attr = cast(Plan.jsonb_data['ncb_percent_per_year'].astext, Float)
+            sort_attr = Plan.jsonb_data['ncb_percent_per_year'].as_float()
         elif sort_by == "child_age":
-            sort_attr = cast(Plan.jsonb_data['max_child_age'].astext, Integer)
+            sort_attr = Plan.jsonb_data['max_child_age'].as_integer()
         elif sort_by == "claim_settlement":
-            sort_attr = cast(Plan.jsonb_data['claim_settlement_ratio_percent'].astext, Float)
+            sort_attr = Plan.jsonb_data['claim_settlement_ratio_percent'].as_float()
         elif sort_by == "cashless_hospitals":
-            sort_attr = cast(Plan.jsonb_data['cashless_hospitals'].astext, Integer)
+            sort_attr = Plan.jsonb_data['cashless_hospitals'].as_integer()
         elif sort_by == "plan_name":
             sort_attr = Plan.name
 
@@ -137,6 +140,7 @@ async def get_plan_by_name(
     if not plan:
         raise HTTPException(status_code=404, detail="Plan not found")
     return plan
+
 @router.get("/id/{plan_id}/riders", response_model=List[RiderSchema])
 async def get_plan_riders(
     plan_id: uuid.UUID,
