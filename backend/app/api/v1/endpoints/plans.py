@@ -6,8 +6,8 @@ from typing import List
 import uuid
 
 from app.core.database import get_db
-from app.models.insurance import Plan
-from app.schemas.insurance import Plan as PlanSchema, PlanCreate, PlanUpdate
+from app.models.insurance import Plan, Rider
+from app.schemas.insurance import Plan as PlanSchema, PlanCreate, PlanUpdate, Rider as RiderSchema
 
 router = APIRouter()
 
@@ -67,3 +67,17 @@ async def get_plan_by_id(
     if not plan:
         raise HTTPException(status_code=404, detail="Plan not found")
     return plan
+@router.get("/id/{plan_id}/riders", response_model=List[RiderSchema])
+async def get_plan_riders(
+    plan_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db)
+):
+    query = select(Rider).where(Rider.plan_id == plan_id)
+    result = await db.execute(query)
+    riders = result.scalars().all()
+    if not riders:
+        # Check if plan exists to distinguish between "no riders" and "plan not found"
+        plan = await db.get(Plan, plan_id)
+        if not plan:
+            raise HTTPException(status_code=404, detail="Plan not found")
+    return riders

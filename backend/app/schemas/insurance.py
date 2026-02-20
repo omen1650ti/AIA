@@ -4,17 +4,15 @@ import uuid
 
 # --- Rider Schemas ---
 class RiderBase(BaseModel):
-    rider_name: str
-    description: Optional[str] = None
-    price: float
+    rider_json: Dict[str, Any]
 
-class RiderCreate(RiderBase):
-    pass
+class RiderCreate(BaseModel):
+    plan_id: uuid.UUID
+    rider_json: Dict[str, Any]
 
 class RiderUpdate(BaseModel):
-    rider_name: Optional[str] = None
-    description: Optional[str] = None
-    price: Optional[float] = None
+    plan_id: Optional[uuid.UUID] = None
+    rider_json: Optional[Dict[str, Any]] = None
 
 class Rider(RiderBase):
     id: uuid.UUID

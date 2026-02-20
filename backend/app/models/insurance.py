@@ -62,8 +62,6 @@ class Rider(Base):
         ForeignKey("plans.id")
     )
 
-    rider_name: Mapped[str] = mapped_column(String)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    price: Mapped[float] = mapped_column(Float)
+    rider_json: Mapped[dict] = mapped_column(JSON)
 
     plan: Mapped["Plan"] = relationship(back_populates="riders")
