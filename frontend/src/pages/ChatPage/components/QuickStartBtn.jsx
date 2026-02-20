@@ -25,7 +25,6 @@ const QuickStartBtn = React.memo(({ icon, label, onClick, delay }) => {
         color:        T.textPrimary,
         textAlign:    "left",
         width:        "100%",
-        fontFamily:   T.font,
         transition:   "box-shadow 0.2s",
       }}
     >

@@ -1,85 +1,39 @@
 import React from 'react';
 import { CheckIcon } from "./Icons";
-import { S } from "../styles/theme";
 
 function PolicyCard({ p }) {
   return (
-    <div style={{
-      background:   S.white,
-      border:       p.featured ? `2px solid ${S.purpleMid}` : `1px solid ${S.border}`,
-      borderRadius: 16,
-      padding:      "20px 22px",
-      display:      "flex",
-      alignItems:   "center",
-      gap:          18,
-      position:     "relative",
-      boxShadow:    p.featured ? "0 4px 20px rgba(124,58,237,0.10)" : "0 1px 4px rgba(0,0,0,0.04)",
-      transition:   "box-shadow 0.2s",
-    }}
-    onMouseEnter={e => e.currentTarget.style.boxShadow = "0 8px 28px rgba(124,58,237,0.13)"}
-    onMouseLeave={e => e.currentTarget.style.boxShadow = p.featured ? "0 4px 20px rgba(124,58,237,0.10)" : "0 1px 4px rgba(0,0,0,0.04)"}
+    <div 
+      className={`bg-white rounded-2xl p-5 flex items-center gap-4.5 relative transition-shadow duration-200 shadow-sm hover:shadow-[0_8px_28px_rgba(124,58,237,0.13)] ${
+        p.featured ? "border-2 border-violet-300 shadow-[0_4px_20px_rgba(124,58,237,0.1)]" : "border border-slate-200"
+      }`}
     >
-      {/* AI Match badge */}
-      {p.aiMatch && (
-        <div style={{
-          position:     "absolute",
-          top:          -1,
-          right:        20,
-          background:   S.purpleGrad,
-          color:        "#fff",
-          fontSize:     11,
-          fontWeight:   700,
-          padding:      "4px 10px",
-          borderRadius: "0 0 8px 8px",
-          letterSpacing: "0.04em",
-        }}>
-          {p.aiMatch}% AI MATCH
-        </div>
-      )}
+    
 
       {/* Logo */}
-      <div style={{
-        width:          48,
-        height:         48,
-        borderRadius:   12,
-        background:     p.color,
-        display:        "flex",
-        alignItems:     "center",
-        justifyContent: "center",
-        flexShrink:     0,
-        color:          "#fff",
-        fontSize:       20,
-        fontWeight:     800,
-      }}>
+      <div 
+        className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-white text-xl font-extrabold"
+        style={{ background: p.color }}
+      >
         {p.initial}
       </div>
 
       {/* Info */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: S.text, marginBottom: 4 }}>{p.name}</div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+      <div className="flex-1 min-w-0">
+        <div className="text-[15px] font-bold text-slate-900 mb-1">{p.name}</div>
+        <div className="flex items-center gap-1.5 mb-2">
           {p.verified && (
-            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 11, color: "#16a34a", fontWeight: 500 }}>
+            <span className="flex items-center gap-0.75 text-[11px] text-green-600 font-medium">
               <CheckIcon color="#16a34a" /> Verified Provider
             </span>
           )}
-          <span style={{ color: S.textMuted, fontSize: 11 }}>•</span>
-          <span style={{ fontSize: 11, color: S.textSub }}>{p.tag}</span>
+          <span className="text-slate-400 text-[11px]">•</span>
+          <span className="text-[11px] text-slate-500">{p.tag}</span>
         </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        <div className="flex flex-wrap gap-1.5">
           {p.features.map((f) => (
-            <span key={f} style={{
-              display:      "flex",
-              alignItems:   "center",
-              gap:          4,
-              fontSize:     11,
-              color:        S.textSub,
-              background:   S.bg,
-              padding:      "3px 8px",
-              borderRadius: 20,
-              border:       `1px solid ${S.border}`,
-            }}>
-              <CheckIcon color={S.purple} />
+            <span key={f} className="flex items-center gap-1 text-[11px] text-slate-500 bg-slate-50 px-2 py-0.75 rounded-full border border-slate-200">
+              <CheckIcon color="#7c3aed" />
               {f}
             </span>
           ))}
@@ -87,28 +41,17 @@ function PolicyCard({ p }) {
       </div>
 
       {/* Price + CTA */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 10, flexShrink: 0 }}>
+      <div className="flex flex-col items-end gap-2.5 shrink-0">
         <div>
-          <span style={{ fontSize: 26, fontWeight: 800, color: S.text }}>${p.price}</span>
-          <span style={{ fontSize: 13, color: S.textMuted, fontWeight: 400 }}>/mo</span>
+          <span className="text-[26px] font-extrabold text-slate-900">${p.price}</span>
+          <span className="text-[13px] text-slate-400 font-normal">/mo</span>
         </div>
-        <button style={{
-          padding:      "9px 20px",
-          borderRadius: 10,
-          fontSize:     13,
-          fontWeight:   600,
-          cursor:       "pointer",
-          border:       "none",
-          background:   p.ctaPrimary ? S.purpleGrad : S.bg,
-          color:        p.ctaPrimary ? "#fff" : S.text,
-          boxShadow:    p.ctaPrimary ? "0 4px 14px rgba(124,58,237,0.35)" : "none",
-          border:       p.ctaPrimary ? "none" : `1px solid ${S.border}`,
-          transition:   "opacity 0.2s",
-          fontFamily:   S.font,
-          whiteSpace:   "nowrap",
-        }}
-        onMouseEnter={e => e.currentTarget.style.opacity = "0.88"}
-        onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+        <button 
+          className={`px-5 py-2.25 rounded-lg text-[13px] font-semibold cursor-pointer whitespace-nowrap transition-opacity duration-200 hover:opacity-90 ${
+            p.ctaPrimary 
+              ? "bg-linear-to-br from-violet-600 to-violet-800 text-white shadow-[0_4px_14px_rgba(124,58,237,0.35)]" 
+              : "bg-slate-50 text-slate-900 border border-slate-200"
+          }`}
         >
           {p.cta}
         </button>

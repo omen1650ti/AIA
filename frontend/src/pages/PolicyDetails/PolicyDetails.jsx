@@ -68,7 +68,6 @@ const PolicyDetails = () => {
         padding: "32px 32px 32px",
         background: S.bg,
         minHeight: "100%",
-        fontFamily: S.font,
       }}
     >
       <PageHeader />

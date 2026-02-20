@@ -4,6 +4,11 @@ import { S } from "../pages/InsurancePage/styles/theme";
 import { Link } from "react-router-dom";
 
 function NavBar() {
+  const navLinks = [
+  { label: "Home", path: "/" },
+  { label: "Policies", path: "/policies" },
+  { label: "Review Claim", path: "/claim-reviewer" },
+];
   return (
     <header
       style={{
@@ -27,7 +32,7 @@ function NavBar() {
         <Link
           style={{
             fontWeight: 800,
-            fontSize: 16,
+            fontSize: 20,
             color: S.text,
             letterSpacing: "-0.02em",
           }}
@@ -38,34 +43,28 @@ function NavBar() {
       </div>
 
       {/* Nav links */}
-      <nav style={{ display: "flex", alignItems: "center", gap: 28 }}>
-        {["Marketplace", "My Policies", "Claims", "Risk Profile"].map(
-          (link, i) => (
-            <a
-              key={link}
-              href="#"
-              style={{
-                fontSize: 14,
-                fontWeight: i === 0 ? 600 : 400,
-                color: i === 0 ? S.purple : S.textSub,
-                textDecoration: "none",
-                borderBottom:
-                  i === 0 ? `2px solid ${S.purple}` : "2px solid transparent",
-                paddingBottom: 2,
-                transition: "color 0.2s",
-              }}
-            >
-              {link}
-            </a>
-          ),
-        )}
-      </nav>
+     <nav style={{ display: "flex", alignItems: "center", gap: 28 }}>
+  {navLinks.map((link) => (
+    <Link
+      key={link.path}
+      to={link.path}
+      style={{
+        fontSize: 14,
+        color: S.textSub,
+        textDecoration: "none",
+      }}
+    >
+      {link.label}
+    </Link>
+  ))}
+</nav>
 
       {/* Bell + Avatar */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
+          marginLeft: "auto",
           gap: 12,
           flexShrink: 0,
         }}

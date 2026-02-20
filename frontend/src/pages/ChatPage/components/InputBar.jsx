@@ -48,7 +48,6 @@ const InputBar = React.memo(({ input, setInput, onSend, isTyping, inputRef }) =>
             outline:    "none",
             fontSize:   13,
             color:      T.textPrimary,
-            fontFamily: T.font,
             caretColor: T.purple,
           }}
         />

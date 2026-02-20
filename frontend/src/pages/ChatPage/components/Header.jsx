@@ -16,8 +16,6 @@ const Header = React.memo(() => {
     }}>
       <div style={{ position: "relative" }}>
         <motion.div
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
           style={{
             width:          40,
             height:         40,
@@ -32,8 +30,6 @@ const Header = React.memo(() => {
           <Bot size={18} color="#fff" />
         </motion.div>
         <motion.div
-          animate={{ scale: [1, 1.35, 1], opacity: [1, 0.55, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           style={{
             position:     "absolute",
             bottom:       -1,
@@ -49,7 +45,7 @@ const Header = React.memo(() => {
 
       <div>
         <p style={{ fontSize: 14, fontWeight: 700, color: T.textPrimary, margin: 0, lineHeight: 1.3 }}>
-          Lumina AI
+          Lumina
         </p>
         <p style={{ fontSize: 11, color: T.textSecondary, margin: 0 }}>
           Insurance Specialist

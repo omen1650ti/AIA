@@ -19,7 +19,6 @@ function ChatPage({ filters, setFilters }) {
   const inputRef     = useRef(null);
   const mockIndexRef = useRef(0);
 
-  // Auto-scroll on new message or typing change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);

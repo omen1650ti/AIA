@@ -50,7 +50,7 @@ function GridPolicyCard({ p }) {
           {p.type}
         </span>
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <div className="flex flex-col gap-1.5">
         {[
           ["Premium", `$${p.premium}/mo`],
           ["Age Range", `${p.minAge} – ${p.maxAge}`],
@@ -83,7 +83,6 @@ function GridPolicyCard({ p }) {
           fontWeight: 600,
           color: S.purple,
           cursor: "pointer",
-          fontFamily: S.font,
           transition: "background 0.2s",
         }}
         onMouseEnter={(e) => (e.currentTarget.style.background = "#ddd6fe")}

@@ -2,7 +2,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:9000/api",
+  baseURL: "https://635a-103-141-54-142.ngrok-free.app/api/",
   timeout: 300000,
 });
 

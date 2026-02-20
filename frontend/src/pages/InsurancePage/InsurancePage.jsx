@@ -9,14 +9,10 @@ import PolicyCard from "./components/PolicyCard";
 import GridPolicyCard from "./components/GridPolicyCard";
 import { ChevronRightIcon } from "./components/Icons";
 
-// Styles & Utils
-import { S } from "./styles/theme";
 import { TOP_PICKS } from "./util/constants";
+import PolicyCompare from "./components/PolicyCompare";
+import { S  } from "./styles/theme";
 
-/**
- * InsurancePage.jsx
- * Modularized version.
- */
 function InsurancePage() {
   const { policies, filters, updateFilter, setFilters } = useOutletContext();
   return (
@@ -26,7 +22,6 @@ function InsurancePage() {
         flexDirection: "column",
         height: "100%",
         background: S.bg,
-        fontFamily: S.font,
       }}
     >
       {/* Filter bar */}
@@ -35,142 +30,68 @@ function InsurancePage() {
         updateFilter={updateFilter}
         setFilters={setFilters}
       />
-
-      {/* Hero */}
-      <HeroSection />
-
-      {/* Main content area */}
-      <div style={{ padding: "28px 32px 40px"}}>
-        {/* Top Picks section */}
-        <div style={{ marginBottom: 32 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 16,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <h2
-                style={{
-                  fontSize: 18,
-                  fontWeight: 700,
-                  color: S.text,
-                  margin: 0,
-                }}
-              >
-                Top Picks for You
-              </h2>
-              <span
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  padding: "2px 10px",
-                  background: S.purpleLight,
-                  color: S.purple,
-                  borderRadius: 20,
-                  border: `1px solid ${S.purpleMid}`,
-                }}
-              >
-                {TOP_PICKS.length} MATCHES
-              </span>
-            </div>
-            <button
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                fontSize: 13,
-                color: S.purple,
-                fontWeight: 600,
-                fontFamily: S.font,
-              }}
-            >
-              View all results <ChevronRightIcon />
-            </button>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {TOP_PICKS.map((p) => (
-              <PolicyCard key={p.id} p={p} />
-            ))}
-          </div>
-        </div>
-
-        {/* All Policies section */}
-        {policies && policies.length > 0 && (
-          <div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: 16,
-              }}
-            >
-              <h2
-                style={{
-                  fontSize: 18,
-                  fontWeight: 700,
-                  color: S.text,
-                  margin: 0,
-                }}
-              >
-                All Policies
-              </h2>
-              <span style={{ fontSize: 13, color: S.textSub }}>
-                {policies.length} result{policies.length !== 1 ? "s" : ""}
-              </span>
+      <div className="flex-1 overflow-y-auto">
+        <HeroSection />
+        <div className="p-7 px-8 pb-10 w-full">
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <h2 className="text-lg font-bold text-slate-900 m-0">
+                  Top Picks for You
+                </h2>
+                <span className="text-[11px] font-semibold px-2.5 py-0.5 bg-violet-50 text-violet-600 rounded-full border border-violet-300">
+                  {TOP_PICKS.length} MATCHES
+                </span>
+              </div>
+              <button className="flex items-center gap-1 bg-none border-none cursor-pointer text-sm text-violet-600 font-semibold font-sans">
+                View all results <ChevronRightIcon />
+              </button>
             </div>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-                gap: 14,
-              }}
-            >
-              {policies.map((p) => (
-                <GridPolicyCard key={p.id} p={p} />
+            <div className="flex flex-col gap-3">
+              {TOP_PICKS.map((p) => (
+                <PolicyCard key={p.id} p={p} />
               ))}
             </div>
+          </div>
 
-            {policies.length === 0 && (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "48px 0",
-                  color: S.textMuted,
-                  fontSize: 14,
-                }}
-              >
-                No policies found matching your criteria.
+          <PolicyCompare />
+
+          {/* All Policies section */}
+          {policies && policies.length > 0 && (
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-slate-900 m-0">
+                  All Policies
+                </h2>
+                <span className="text-sm text-slate-500">
+                  {policies.length} result{policies.length !== 1 ? "s" : ""}
+                </span>
               </div>
-            )}
-          </div>
-        )}
 
-        {/* Empty state when no policies passed */}
-        {(!policies || policies.length === 0) && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "40px 0",
-              color: S.textMuted,
-              fontSize: 14,
-              background: S.white,
-              borderRadius: 14,
-              border: `1px solid ${S.border}`,
-            }}
-          >
-            <div style={{ fontSize: 32, marginBottom: 8 }}>🔍</div>
-            No policies found matching your criteria.
-          </div>
-        )}
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-3.5">
+                {policies.map((p) => (
+                  <GridPolicyCard key={p.id} p={p} />
+                ))}
+              </div>
+
+              {policies.length === 0 && (
+                <div className="text-center py-12 text-slate-400 text-sm bg-white rounded-[14px] border border-slate-200">
+                  No policies found matching your criteria.
+                </div>
+              )}
+            </div>
+          )}
+          
+
+          {/* Empty state when no policies passed */}
+          {(!policies || policies.length === 0) && (
+            <div className="text-center py-10 text-slate-400 text-sm bg-white rounded-[14px] border border-slate-200">
+              <div className="text-[32px] mb-2">🔍</div>
+              No policies found matching your criteria.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

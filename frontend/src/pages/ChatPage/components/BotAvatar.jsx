@@ -6,7 +6,6 @@ import { T } from "../styles/theme";
 const BotAvatar = React.memo(({ size = 32, pulse = false }) => {
   return (
     <motion.div
-      animate={pulse ? { scale: [1, 1.06, 1] } : {}}
       transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
       style={{
         width:          size,

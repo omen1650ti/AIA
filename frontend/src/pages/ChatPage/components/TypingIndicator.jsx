@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from "framer-motion";
 import { Bot } from "lucide-react";
 import { T } from "../styles/theme";
+import BouncingLoader from "../../../components/BouncingLoader";
 
 const TypingIndicator = React.memo(() => {
   return (
@@ -35,14 +36,7 @@ const TypingIndicator = React.memo(() => {
         border:       `1px solid ${T.border}`,
         borderRadius: `${T.radius.lg}px ${T.radius.lg}px ${T.radius.lg}px ${T.radius.xs}px`,
       }}>
-        {[0, 1, 2].map((i) => (
-          <motion.div
-            key={i}
-            style={{ width: 7, height: 7, borderRadius: "50%", background: T.purple }}
-            animate={{ y: [0, -5, 0], opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 0.75, repeat: Infinity, delay: i * 0.15 }}
-          />
-        ))}
+        <BouncingLoader size="h-1.5 w-1.5" spacing="space-x-1" />
       </div>
       <motion.span
         initial={{ opacity: 0 }}

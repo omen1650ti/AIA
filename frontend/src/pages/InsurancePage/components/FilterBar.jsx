@@ -1,37 +1,22 @@
 import React from 'react';
 import { FilterIcon } from "./Icons";
-import { S } from "../styles/theme";
 
 function FilterBar({ filters, updateFilter, setFilters }) {
-  const inputStyle = {
-    padding:      "8px 12px",
-    border:       `1px solid ${S.border}`,
-    borderRadius: 8,
-    fontSize:     13,
-    color:        S.text,
-    background:   S.white,
-    outline:      "none",
-    fontFamily:   S.font,
-    cursor:       "pointer",
-  };
+  const inputClassName = "px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 bg-white outline-none font-sans cursor-pointer focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all";
 
   return (
-    <div style={{
-      display:    "flex",
-      alignItems: "center",
-      gap:        8,
-      padding:    "12px 32px",
-      background: S.white,
-      borderBottom: `1px solid ${S.border}`,
-      flexWrap:   "wrap",
-      flexShrink: 0,
-    }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, color: S.textSub, fontSize: 13, marginRight: 4 }}>
+    <div className="flex items-center gap-2 px-8 py-3 bg-white border-b border-slate-200 flex-wrap shrink-0">
+      <div className="flex items-center gap-1.5 text-slate-500 text-sm mr-1">
         <FilterIcon />
-        <span style={{ fontWeight: 500 }}>Filters</span>
+        <span className="font-medium">Filters</span>
       </div>
 
-      <select name="type" value={filters.type} onChange={updateFilter} style={inputStyle}>
+      <select
+        name="type"
+        value={filters.type}
+        onChange={updateFilter}
+        className={inputClassName}
+      >
         <option value="">All Types</option>
         <option value="Health">Health</option>
         <option value="Life">Life</option>
@@ -39,16 +24,39 @@ function FilterBar({ filters, updateFilter, setFilters }) {
         <option value="Auto">Auto</option>
       </select>
 
-      <input type="number" name="maxPremium" placeholder="Max Premium" value={filters.maxPremium} onChange={updateFilter}
-        style={{ ...inputStyle, width: 120 }} />
+      <input
+        type="number"
+        name="maxPremium"
+        placeholder="Max Premium"
+        value={filters.maxPremium}
+        onChange={updateFilter}
+        className={`${inputClassName} w-[120px]`}
+      />
 
-      <input type="number" name="age" placeholder="Age" value={filters.age} onChange={updateFilter}
-        style={{ ...inputStyle, width: 80 }} />
+      <input
+        type="number"
+        name="age"
+        placeholder="Age"
+        value={filters.age}
+        onChange={updateFilter}
+        className={`${inputClassName} w-[80px]`}
+      />
 
-      <input type="number" name="minCoverage" placeholder="Min Coverage" value={filters.minCoverage} onChange={updateFilter}
-        style={{ ...inputStyle, width: 130 }} />
+      <input
+        type="number"
+        name="minCoverage"
+        placeholder="Min Coverage"
+        value={filters.minCoverage}
+        onChange={updateFilter}
+        className={`${inputClassName} w-[130px]`}
+      />
 
-      <select name="sortBy" value={filters.sortBy} onChange={updateFilter} style={inputStyle}>
+      <select
+        name="sortBy"
+        value={filters.sortBy}
+        onChange={updateFilter}
+        className={inputClassName}
+      >
         <option value="">Sort By</option>
         <option value="premium_asc">Premium: Low → High</option>
         <option value="premium_desc">Premium: High → Low</option>
@@ -57,16 +65,7 @@ function FilterBar({ filters, updateFilter, setFilters }) {
 
       <button
         onClick={() => setFilters({ type: "", maxPremium: "", age: "", minCoverage: "", search: "", sortBy: "" })}
-        style={{
-          padding:      "8px 14px",
-          background:   S.purpleLight,
-          border:       `1px solid ${S.purpleMid}`,
-          borderRadius: 8,
-          fontSize:     13,
-          fontWeight:   500,
-          color:        S.purple,
-          cursor:       "pointer",
-        }}
+        className="px-3.5 py-2 bg-violet-50 border border-violet-200 rounded-lg text-sm font-medium text-violet-600 cursor-pointer hover:bg-violet-100 transition-colors"
       >
         Reset
       </button>
