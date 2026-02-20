@@ -2,7 +2,7 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 import MainLayout from "./components/MainLayout";
 import InsurancePage from "./pages/InsurancePage/InsurancePage";
-import Demo from "./pages/Demo/Demo";
+import PolicyDetails from "./pages/PolicyDetails/PolicyDetails";
 
 const App = () => {
   return (
@@ -10,7 +10,7 @@ const App = () => {
       <Route path="/" element={<MainLayout />}>
         <Route index element={<InsurancePage />} />
         <Route path="insurance-page" element={<InsurancePage />} />
-        <Route path="demo" element={<Demo />} />
+        <Route path="policy-details/:policyId" element={<PolicyDetails />} />
       </Route>
     </Routes>
   );
