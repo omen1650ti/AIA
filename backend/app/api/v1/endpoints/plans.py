@@ -36,6 +36,11 @@ async def get_all_plans(
     newborn_baby_cover: Optional[bool] = None,
     daily_cash_allowance: Optional[bool] = None,
     animal_bite_vaccination: Optional[bool] = None,
+    # New filters
+    pre_existing_illness: Optional[bool] = None,
+    personal_accident_care: Optional[bool] = None,
+    premium_care: Optional[bool] = None,
+    wait_period_modification: Optional[bool] = None,
     # Sorting
     sort_by: Optional[str] = Query(None, enum=["waiting_period", "ncb", "child_age", "claim_settlement", "cashless_hospitals", "plan_name"]),
     sort_order: str = Query("asc", enum=["asc", "desc"]),
@@ -82,7 +87,11 @@ async def get_all_plans(
         "baby_addition_to_policy": baby_addition,
         "newborn_baby_cover": newborn_baby_cover,
         "daily_cash_allowance": daily_cash_allowance,
-        "animal_bite_vaccination": animal_bite_vaccination
+        "animal_bite_vaccination": animal_bite_vaccination,
+        "pre_existing_illness": pre_existing_illness,
+        "personal_accident_care": personal_accident_care,
+        "premium_care": premium_care,
+        "wait_period_modification": wait_period_modification
     }
     
     for feature_key, val in feature_map.items():
