@@ -4,6 +4,9 @@ import { toast } from "react-toastify";
 const axiosInstance = axios.create({
   baseURL: "https://635a-103-141-54-142.ngrok-free.app/api/",
   timeout: 300000,
+  headers: {
+    "ngrok-skip-browser-warning": "69420",
+  },
 });
 
 axiosInstance.interceptors.request.use(
@@ -22,7 +25,7 @@ axiosInstance.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 axiosInstance.interceptors.response.use(
@@ -53,9 +56,7 @@ axiosInstance.interceptors.response.use(
 
         case 409:
         case 422:
-          toast.warn(
-            response?.data?.detail || "Oops, something went wrong"
-          );
+          toast.warn(response?.data?.detail || "Oops, something went wrong");
           break;
 
         case 500:
@@ -74,7 +75,7 @@ axiosInstance.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 // ================= COMMON REQUEST HANDLER =================

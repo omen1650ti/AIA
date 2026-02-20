@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { S } from "../InsurancePage/styles/theme";
 import {
@@ -7,6 +7,8 @@ import {
   FilterIcon,
 } from "../InsurancePage/components/Icons";
 import PageHeader from "../InsurancePage/components/PageHeader";
+import { useGetPolicyDetail } from "../../hooks/usePolicyDetails";
+import BouncingLoader from "../../components/BouncingLoader";
 
 // Custom Icons for this page
 const FirstAidIcon = () => (
@@ -57,10 +59,225 @@ const RobotIcon = () => (
   </svg>
 );
 
+const policyDataaa = {
+  details: "plan1",
+  base_price: 24000,
+  jsonb_data: {
+    plan_id: "star_001",
+    plan_name: "Young Star",
+    plan_type: "Individual / Family Floater",
+    target_segment: "Young adults aged 18–40",
+    room_rent_type: "Single Private Room",
+    existing_waiting_period_yrs: 1,
+    ncb_percent_per_year: 25,
+    max_ncb_limit: 100,
+    max_child_age: 25,
+    claim_settlement_ratio_percent: 99.06,
+    cashless_hospitals: 14000,
+    features: {
+      free_checkup: true,
+      free_checkup_frequency: "Once per year",
+      maternity_cover: true,
+      ayush: true,
+      air_evacuation: false,
+      home_hospitalization: true,
+      e_consultation: true,
+      e_consultation_note: "Unlimited teleconsultations via Star Health app",
+      external_copay_percent: 20,
+      external_copay_note: "20% co-pay at non-network hospitals",
+      baby_addition_to_policy: true,
+      baby_addition_note:
+        "Existing child can be added within 90 days of policy purchase",
+      newborn_baby_cover: true,
+      newborn_cover_from_day: 1,
+      newborn_cover_note: "Newborn covered from Day 1 up to sum insured",
+      daily_cash_allowance: true,
+      daily_cash_amount_inr: 500,
+      daily_cash_max_days: 30,
+      daily_cash_note: "₹500/day for shared room upgrade",
+      animal_bite_vaccination: true,
+      animal_bite_note: "Anti-rabies vaccination covered post animal bite",
+    },
+    tiers: [
+      {
+        sum_insured: 500000,
+        base_premium_age_30: 6500,
+      },
+      {
+        sum_insured: 1000000,
+        base_premium_age_30: 11000,
+      },
+      {
+        sum_insured: 2000000,
+        base_premium_age_30: 19000,
+      },
+    ],
+  },
+  id: "3085e922-6fe2-4fa5-9a5b-6012f9945eac",
+  insurance_provider_id: "550e8400-e29b-41d4-a716-446655440000",
+  riders: [
+    {
+      rider_json: {
+        plan_id: 3,
+        claim_settlement_ratio_percent: 97,
+        cashless_hospitals_count: 11000,
+        free_checkup_available: true,
+        home_hospitalization: true,
+        e_consultation_available: false,
+        e_consultation_limit_per_year: 0,
+        external_copay_applicable: true,
+        external_copay_percent: 30,
+        baby_addition_allowed: true,
+        baby_addition_underwriting_required: true,
+        newborn_cover_available: true,
+        newborn_covered_from_day: 91,
+        daily_cash_available: true,
+        daily_cash_amount_inr_per_day: 500,
+        daily_cash_max_days_per_year: 15,
+        animal_bite_vaccination_available: true,
+      },
+      id: "6c63d6d4-5ed2-4a52-b29f-be6518c666d3",
+      plan_id: "3085e922-6fe2-4fa5-9a5b-6012f9945eac",
+    },
+  ],
+};
+
 const PolicyDetails = () => {
   const { policyId } = useParams();
   const [billAmount, setBillAmount] = useState("2,50,000");
   const [isSimpleView, setIsSimpleView] = useState(true);
+  const { data: policyData, isLoading, isError } = useGetPolicyDetail("3085e922-6fe2-4fa5-9a5b-6012f9945eac");
+
+  // Use policyData?.jsonb_data for convenience
+  const data = policyData?.jsonb_data;
+  const riders = policyData?.riders?.[0]?.rider_json;
+
+  // Tier selection state
+  const [selectedTier, setSelectedTier] = useState(null);
+  // Rider selection state
+  const [selectedRiderKeys, setSelectedRiderKeys] = useState([]);
+
+  // Map rider keys to display names, icons, and random prices (generated once per session)
+  const riderMapping = useMemo(
+    () => ({
+      free_checkup_available: {
+        label: "Free Checkup",
+        icon: "🩺",
+        price: Math.floor(Math.random() * 50) + 40,
+      },
+      home_hospitalization: {
+        label: "Home Hospitalization",
+        icon: "🏠",
+        price: Math.floor(Math.random() * 70) + 60,
+      },
+      e_consultation_available: {
+        label: "E-Consultation",
+        icon: "📱",
+        price: Math.floor(Math.random() * 30) + 20,
+      },
+      external_copay_applicable: {
+        label: "External Co-pay",
+        icon: "💰",
+        price: Math.floor(Math.random() * 80) + 70,
+      },
+      baby_addition_allowed: {
+        label: "Baby Addition",
+        icon: "👶",
+        price: Math.floor(Math.random() * 100) + 100,
+      },
+      newborn_cover_available: {
+        label: "Newborn Cover",
+        icon: "🍼",
+        price: Math.floor(Math.random() * 90) + 90,
+      },
+      daily_cash_available: {
+        label: "Daily Cash",
+        icon: "💵",
+        price: Math.floor(Math.random() * 40) + 40,
+      },
+      animal_bite_vaccination_available: {
+        label: "Animal Bite Vaccination",
+        icon: "🐕",
+        price: Math.floor(Math.random() * 30) + 20,
+      },
+    }),
+    [],
+  );
+
+  // Initialize selectedTier when data is loaded
+  React.useEffect(() => {
+    if (data?.tiers?.length > 0 && !selectedTier) {
+      setSelectedTier(data.tiers[0]);
+    }
+  }, [data, selectedTier]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <BouncingLoader />
+      </div>
+    );
+  }
+
+  if (isError || !policyData) {
+    return (
+      <div className="flex justify-center items-center h-screen text-gray-500">
+        <div className="text-center">
+          <h2 className="text-xl font-bold mb-2">Oops!</h2>
+          <p>We couldn't load the policy details. Please try again later.</p>
+          <Link
+            to="/insurance"
+            className="text-purple-600 mt-4 inline-block hover:underline"
+          >
+            Back to Policies
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!selectedTier) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <BouncingLoader />
+      </div>
+    );
+  }
+
+  // Toggle rider selection
+  const toggleRider = (key) => {
+    setSelectedRiderKeys((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+    );
+  };
+
+  // Premium calculation based on logic: ((sum_insured/1000000 )* base_price )/12 + (riders * 10)
+  // Updated Calculation logic
+  const calculatePremium = (sumInsured, selectedKeys = []) => {
+    const basePremium = Math.round(
+      ((sumInsured / 1000000) * policyData.base_price) / 12,
+    );
+
+    // Sum up individual prices from the mapping
+    const ridersPremium = selectedKeys.reduce((total, key) => {
+      return total + (riderMapping[key]?.price || 0);
+    }, 0);
+
+    return basePremium + ridersPremium;
+  };
+
+  // Update how currentPremiumValue is called
+  const currentPremiumValue = calculatePremium(
+    selectedTier.sum_insured,
+    selectedRiderKeys, // Pass the array of keys instead of length
+  );
+  // Helper to format currency
+  const formatCurrency = (val) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(val);
 
   return (
     <div
@@ -68,6 +285,7 @@ const PolicyDetails = () => {
         padding: "32px 32px 32px",
         background: S.bg,
         minHeight: "100%",
+        fontFamily: S.font,
       }}
     >
       <PageHeader />
@@ -102,7 +320,7 @@ const PolicyDetails = () => {
                     }}
                   >
                     <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>
-                      Platinum Health Shield
+                      {data.plan_name}
                     </h2>
                     <span style={tagStyle}>TOP MATCH</span>
                   </div>
@@ -111,18 +329,37 @@ const PolicyDetails = () => {
                       fontSize: 14,
                       color: S.textSub,
                       display: "flex",
-                      alignItems: "center",
-                      gap: 12,
+                      flexDirection: "column",
+                      gap: 4,
                     }}
                   >
-                    <span>🛡️ Reliance General</span>
-                    <span>⭐ 4.9 (2.4k reviews)</span>
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 12 }}
+                    >
+                      <span>🛡️ {data.plan_type}</span>
+                      <span>⭐ 4.9 (2.4k reviews)</span>
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        display: "flex",
+                        gap: 12,
+                        marginTop: 4,
+                      }}
+                    >
+                      <span>
+                        Waiting: <b>{data.existing_waiting_period_yrs} Yr</b>
+                      </span>
+                      <span>
+                        NCB: <b>{data.ncb_percent_per_year}% / yr</b>
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
               <div style={{ textAlign: "right" }}>
                 <div style={{ fontSize: 24, fontWeight: 800, color: S.text }}>
-                  ₹1,450
+                  {formatCurrency(currentPremiumValue)}
                   <span
                     style={{ fontSize: 14, fontWeight: 400, color: S.textSub }}
                   >
@@ -137,8 +374,71 @@ const PolicyDetails = () => {
                     marginTop: 4,
                   }}
                 >
-                  Includes 15% No-Claim Bonus
+                  Includes {data.ncb_percent_per_year}% No-Claim Bonus
                 </div>
+              </div>
+            </div>
+
+            {/* Tiers / Sum Insured Selection */}
+            <div style={{ marginBottom: 32 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 800,
+                  color: S.textSub,
+                  textTransform: "uppercase",
+                  marginBottom: 12,
+                  letterSpacing: "0.05em",
+                }}
+              >
+                Choose Sum Insured
+              </div>
+              <div style={{ display: "flex", gap: 12 }}>
+                {data.tiers.map((tier, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => setSelectedTier(tier)}
+                    style={{
+                      flex: 1,
+                      padding: "16px",
+                      borderRadius: 16,
+                      border: `2px solid ${
+                        selectedTier.sum_insured === tier.sum_insured
+                          ? S.purple
+                          : S.border
+                      }`,
+                      background:
+                        selectedTier.sum_insured === tier.sum_insured
+                          ? "#f5f3ff"
+                          : "white",
+                      cursor: "pointer",
+                      transition: "0.2s transform, 0.2s border-color",
+                      textAlign: "center",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 700,
+                        color:
+                          selectedTier.sum_insured === tier.sum_insured
+                            ? S.purple
+                            : S.text,
+                      }}
+                    >
+                      {formatCurrency(tier.sum_insured)}
+                    </div>
+                    <div
+                      style={{ fontSize: 11, color: S.textSub, marginTop: 4 }}
+                    >
+                      Premium:{" "}
+                      {formatCurrency(
+                        calculatePremium(tier.sum_insured, selectedRiderKeys),
+                      )}
+                      /mo
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -201,7 +501,9 @@ const PolicyDetails = () => {
                   Settlement Ratio
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ fontSize: 16, fontWeight: 700 }}>92.4%</span>
+                  <span style={{ fontSize: 16, fontWeight: 700 }}>
+                    {data.claim_settlement_ratio_percent}%
+                  </span>
                   <span style={{ fontSize: 12, color: "#10b981" }}>↗</span>
                 </div>
               </div>
@@ -215,9 +517,11 @@ const PolicyDetails = () => {
                     marginBottom: 4,
                   }}
                 >
-                  Avg. Payout Time
+                  Cashless Hospitals
                 </div>
-                <div style={{ fontSize: 16, fontWeight: 700 }}>4.2 Hours</div>
+                <div style={{ fontSize: 16, fontWeight: 700 }}>
+                  {data.cashless_hospitals.toLocaleString()}+
+                </div>
               </div>
             </div>
 
@@ -303,12 +607,22 @@ const PolicyDetails = () => {
                       gap: 6,
                     }}
                   >
-                    <CheckIcon color="#166534" /> WHAT IS COVERED
+                    <CheckIcon color="#166534" /> KEY FEATURES
                   </div>
                   <ul style={listStyle}>
-                    <li>Zero room rent capping on shared/private</li>
-                    <li>Pre & post hospitalization (60/180 days)</li>
-                    <li>Mental health & alternative treatments</li>
+                    {data.features.maternity_cover && (
+                      <li>Maternity Coverage included</li>
+                    )}
+                    {data.features.ayush && <li>AYUSH treatments covered</li>}
+                    {data.features.home_hospitalization && (
+                      <li>Home Hospitalization supported</li>
+                    )}
+                    {data.features.e_consultation && (
+                      <li>{data.features.e_consultation_note}</li>
+                    )}
+                    <li>
+                      Waiting Period: {data.existing_waiting_period_yrs} year
+                    </li>
                   </ul>
                 </div>
                 <div style={coverageListStyle("#fef2f2")}>
@@ -323,14 +637,182 @@ const PolicyDetails = () => {
                       gap: 6,
                     }}
                   >
-                    <span style={{ color: "#991b1b" }}>ⓧ</span> WHAT IS NOT
-                    COVERED
+                    <span style={{ color: "#991b1b" }}>ⓧ</span> IMPORTANT NOTES
                   </div>
                   <ul style={listStyle}>
-                    <li>Cosmetic surgeries or non-medical aesthetic</li>
-                    <li>Self-inflicted injuries or substance abuse</li>
+                    {data.features.external_copay_percent > 0 && (
+                      <li>{data.features.external_copay_note}</li>
+                    )}
+                    {!data.features.air_evacuation && (
+                      <li>Air Evacuation not included</li>
+                    )}
+                    {data.features.daily_cash_allowance && (
+                      <li>{data.features.daily_cash_note}</li>
+                    )}
                   </ul>
                 </div>
+              </div>
+            </div>
+
+            {/* Riders Section */}
+            <div style={{ marginTop: 32 }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: 16,
+                }}
+              >
+                <span style={{ fontSize: 18 }}>🎭</span>
+                <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>
+                  Available Riders
+                </h3>
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+                  gap: 12,
+                }}
+              >
+                {Object.entries(riders || {})
+                  .filter(
+                    ([key, val]) =>
+                      val === true &&
+                      key !== "claim_settlement_ratio_percent" &&
+                      key !== "cashless_hospitals_count" &&
+                      riderMapping[key],
+                  )
+                  .map(([key, val], idx) => {
+                    const isSelected = selectedRiderKeys.includes(key);
+                    return (
+                      <div
+                        key={idx}
+                        onClick={() => toggleRider(key)}
+                        style={{
+                          padding: "16px",
+                          borderRadius: 16,
+                          border: `2px solid ${
+                            isSelected ? S.purple : S.border
+                          }`,
+                          background: isSelected ? "#f5f3ff" : "white",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 12,
+                          transition: "0.2s",
+                          cursor: "pointer",
+                          position: "relative",
+                        }}
+                      >
+                        <span style={{ fontSize: 20 }}>
+                          {riderMapping[key]?.icon}
+                        </span>
+                        <div
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 600,
+                            color: isSelected ? S.purple : S.text,
+                          }}
+                        >
+                          {riderMapping[key]?.label}
+                        </div>
+                        {isSelected && (
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: -8,
+                              right: -8,
+                              background: S.purple,
+                              color: "white",
+                              width: 20,
+                              height: 20,
+                              borderRadius: "50%",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: 10,
+                              fontWeight: 800,
+                              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                            }}
+                          >
+                            ✓
+                          </div>
+                        )}
+                        <div
+                          style={{
+                            marginLeft: "auto",
+                            fontSize: 10,
+                            color: isSelected ? S.purple : S.textSub,
+                            fontWeight: 700,
+                          }}
+                        >
+                          {formatCurrency(riderMapping[key]?.price)}
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+
+            {/* Detailed Features Section */}
+            <div style={{ marginTop: 32 }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: 16,
+                }}
+              >
+                <FilterIcon />
+                <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>
+                  Plan Features
+                </h3>
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 16,
+                }}
+              >
+                {Object.entries(data?.features || {})
+                  .filter(
+                    ([key, val]) => typeof val === "boolean" && val === true,
+                  )
+                  .map(([key, val], idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 10,
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 20,
+                          height: 20,
+                          borderRadius: "50%",
+                          background: "#f0fdf4",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                          marginTop: 2,
+                        }}
+                      >
+                        <CheckIcon color="#166534" />
+                      </div>
+                      <div style={{ fontSize: 14, color: S.text }}>
+                        {key
+                          .split("_")
+                          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                          .join(" ")}
+                      </div>
+                    </div>
+                  ))}
               </div>
             </div>
 
