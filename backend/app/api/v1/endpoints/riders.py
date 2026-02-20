@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from typing import List
+import uuid
 
 from app.core.database import get_db
 from app.models.insurance import Rider
@@ -17,12 +19,15 @@ async def create_rider(
     db_rider = Rider(**rider.model_dump())
     db.add(db_rider)
     await db.commit()
-    await db.refresh(db_rider)
-    return db_rider
+    
+    # Re-query with eager loading for consistency and safety
+    query = select(Rider).options(selectinload(Rider.plan)).where(Rider.id == db_rider.id)
+    result = await db.execute(query)
+    return result.scalars().first()
 
 @router.patch("/id/{rider_id}", response_model=RiderSchema)
 async def update_rider(
-    rider_id: int,
+    rider_id: uuid.UUID,
     rider_update: RiderUpdate,
     db: AsyncSession = Depends(get_db)
 ):
@@ -35,8 +40,11 @@ async def update_rider(
         setattr(db_rider, key, value)
     
     await db.commit()
-    await db.refresh(db_rider)
-    return db_rider
+    
+    # Re-query with eager loading for consistency and safety
+    query = select(Rider).options(selectinload(Rider.plan)).where(Rider.id == db_rider.id)
+    result = await db.execute(query)
+    return result.scalars().first()
 
 @router.get("/", response_model=List[RiderSchema])
 async def get_all_riders(
@@ -44,16 +52,18 @@ async def get_all_riders(
     limit: int = 100,
     db: AsyncSession = Depends(get_db)
 ):
-    query = select(Rider).offset(skip).limit(limit)
+    query = select(Rider).options(selectinload(Rider.plan)).offset(skip).limit(limit)
     result = await db.execute(query)
     return result.scalars().all()
 
 @router.get("/id/{rider_id}", response_model=RiderSchema)
 async def get_rider_by_id(
-    rider_id: int,
+    rider_id: uuid.UUID,
     db: AsyncSession = Depends(get_db)
 ):
-    rider = await db.get(Rider, rider_id)
+    query = select(Rider).options(selectinload(Rider.plan)).where(Rider.id == rider_id)
+    result = await db.execute(query)
+    rider = result.scalars().first()
     if not rider:
         raise HTTPException(status_code=404, detail="Rider not found")
     return rider
@@ -63,7 +73,7 @@ async def get_rider_by_name(
     name: str,
     db: AsyncSession = Depends(get_db)
 ):
-    query = select(Rider).where(Rider.rider_name == name)
+    query = select(Rider).options(selectinload(Rider.plan)).where(Rider.rider_name == name)
     result = await db.execute(query)
     rider = result.scalars().first()
     if not rider:

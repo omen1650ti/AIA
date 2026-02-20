@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from typing import List
+import uuid
 
 from app.core.database import get_db
 from app.models.insurance import Plan
@@ -17,12 +19,15 @@ async def create_plan(
     db_plan = Plan(**plan.model_dump())
     db.add(db_plan)
     await db.commit()
-    await db.refresh(db_plan)
-    return db_plan
+    
+    # Re-query with eager loading to avoid MissingGreenlet error during serialization
+    query = select(Plan).options(selectinload(Plan.riders)).where(Plan.id == db_plan.id)
+    result = await db.execute(query)
+    return result.scalars().first()
 
 @router.patch("/id/{plan_id}", response_model=PlanSchema)
 async def update_plan(
-    plan_id: int,
+    plan_id: uuid.UUID,
     plan_update: PlanUpdate,
     db: AsyncSession = Depends(get_db)
 ):
@@ -35,8 +40,11 @@ async def update_plan(
         setattr(db_plan, key, value)
     
     await db.commit()
-    await db.refresh(db_plan)
-    return db_plan
+    
+    # Re-query with eager loading to avoid MissingGreenlet error during serialization
+    query = select(Plan).options(selectinload(Plan.riders)).where(Plan.id == db_plan.id)
+    result = await db.execute(query)
+    return result.scalars().first()
 
 @router.get("/", response_model=List[PlanSchema])
 async def get_all_plans(
@@ -44,16 +52,18 @@ async def get_all_plans(
     limit: int = 100,
     db: AsyncSession = Depends(get_db)
 ):
-    query = select(Plan).offset(skip).limit(limit)
+    query = select(Plan).options(selectinload(Plan.riders)).offset(skip).limit(limit)
     result = await db.execute(query)
     return result.scalars().all()
 
 @router.get("/id/{plan_id}", response_model=PlanSchema)
 async def get_plan_by_id(
-    plan_id: int,
+    plan_id: uuid.UUID,
     db: AsyncSession = Depends(get_db)
 ):
-    plan = await db.get(Plan, plan_id)
+    query = select(Plan).options(selectinload(Plan.riders)).where(Plan.id == plan_id)
+    result = await db.execute(query)
+    plan = result.scalars().first()
     if not plan:
         raise HTTPException(status_code=404, detail="Plan not found")
     return plan
