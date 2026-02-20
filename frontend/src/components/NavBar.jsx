@@ -1,6 +1,6 @@
 import React from "react";
-import { SearchIcon, BellIcon } from "./Icons";
-import { S } from "../styles/theme";
+import { SearchIcon, BellIcon } from "../pages/InsurancePage/components/Icons";
+import { S } from "../pages/InsurancePage/styles/theme";
 import { Link } from "react-router-dom";
 
 function NavBar() {

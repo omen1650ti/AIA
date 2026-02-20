@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Outlet } from "react-router-dom";
 import ChatPage from "../pages/ChatPage/ChatPage";
-import NavBar from "../pages/InsurancePage/components/NavBar";
+import NavBar from "./NavBar";
 import PageHeader from "../pages/InsurancePage/components/PageHeader";
 
 const MainLayout = () => {

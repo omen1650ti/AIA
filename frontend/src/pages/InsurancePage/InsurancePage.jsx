@@ -2,7 +2,7 @@ import React from "react";
 import { useOutletContext } from "react-router-dom";
 
 // Components
-import NavBar from "./components/NavBar";
+import NavBar from "../../components/NavBar";
 import FilterBar from "./components/FilterBar";
 import HeroSection from "./components/HeroSection";
 import PolicyCard from "./components/PolicyCard";
@@ -40,7 +40,7 @@ function InsurancePage() {
       <HeroSection />
 
       {/* Main content area */}
-      <div style={{ padding: "28px 32px 40px", maxWidth: 900 }}>
+      <div style={{ padding: "28px 32px 40px"}}>
         {/* Top Picks section */}
         <div style={{ marginBottom: 32 }}>
           <div
