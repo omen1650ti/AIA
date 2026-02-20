@@ -1,6 +1,7 @@
 import React from "react";
 import { SearchIcon, BellIcon } from "./Icons";
 import { S } from "../styles/theme";
+import { Link } from "react-router-dom";
 
 function NavBar() {
   return (
@@ -23,16 +24,17 @@ function NavBar() {
       <div
         style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}
       >
-        <span
+        <Link
           style={{
             fontWeight: 800,
             fontSize: 16,
             color: S.text,
             letterSpacing: "-0.02em",
           }}
+          to={"/insurance-page"}
         >
           InsureAI
-        </span>
+        </Link>
       </div>
 
       {/* Nav links */}
