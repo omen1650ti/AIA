@@ -6,6 +6,7 @@ import {
   SparkleIcon,
   FilterIcon,
 } from "../InsurancePage/components/Icons";
+import PageHeader from "../InsurancePage/components/PageHeader";
 
 // Custom Icons for this page
 const FirstAidIcon = () => (
@@ -70,6 +71,8 @@ const PolicyDetails = () => {
         fontFamily: S.font,
       }}
     >
+      <PageHeader />
+
       <div
         style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 32 }}
       >

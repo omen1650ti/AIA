@@ -50,7 +50,6 @@ const MainLayout = () => {
       <div className="flex-[3] border-r border-slate-200 flex flex-col overflow-hidden">
         <NavBar />
         <div className="flex-1 overflow-auto py-8">
-          <PageHeader />
           <Outlet context={{ policies, filters, updateFilter, setFilters }} />
         </div>
       </div>
