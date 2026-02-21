@@ -15,7 +15,6 @@ from app.schemas.chat import (
 )
 from app.agents.core import run_agent, get_agent_manager
 from app.core.database import AsyncSessionLocal
-from app.models.conversation import ConversationThread, ConversationMessage
 from sqlalchemy import select
 from app.api.v1.endpoints.plans import get_plan_by_id
 
@@ -62,21 +61,26 @@ class ChatService:
         old_policy_info = await get_plan_by_id(old_policy_id, db)
         new_policy_info = await get_plan_by_id(new_policy_id, db)
         if old_policy_info:
-            policy_info_list.append(f"Old Policy: {old_policy_info}")
+            print("old_policy_info", old_policy_info.jsonb_data)
+            policy_info_list.append(f"Old Policy: {old_policy_info.jsonb_data}")
 
         if new_policy_info:
-            policy_info_list.append(f"New Policy: {new_policy_info}")
+            print("new_policy_info", new_policy_info.jsonb_data)
+            policy_info_list.append(f"New Policy: {new_policy_info.jsonb_data}")
 
         try:
             policy_details = "Policy Details:\n" + "\n".join(
                 [f"- {info}" for info in policy_info_list]
             )
-            response = run_agent(
+            print("run_agent")
+            response = await run_agent(
                 user_message=policy_details,
                 thread_id="policy_check_thread",
                 user_profile={},
                 is_policy_check=True,
             )
+
+            print("response", response)
 
             return ChatResponse(
                 thread_id="policy_check_thread",
@@ -126,33 +130,25 @@ class ChatService:
             # Use existing thread_id or create new one
             thread_id = request.thread_id
 
-            # If thread_id is provided, verify it exists
-            if thread_id:
-                thread_exists = await ChatService._thread_exists(thread_id)
-                if not thread_exists:
-                    logger.warning(f"Thread {thread_id} not found, creating new one")
-                    thread_id = None
-
             # Create new thread if needed
             if not thread_id:
                 thread_id = str(uuid.uuid4())
-                await ChatService._create_thread(thread_id)
-                logger.info(f"Created new thread: {thread_id}")
+                logger.info(f"Using new thread ID: {thread_id}")
 
-            # Store user message
-            await ChatService._store_message(thread_id, "user", request.message, "text")
+            # Store user message (No-op)
+            # await ChatService._store_message(thread_id, "user", request.message, "text")
 
             # No attachment preprocessing: pass the raw user message to the agent
             augmented_message = request.message
 
-            # If user_profile provided, store it as a profile message
-            if getattr(request, "user_profile", None):
-                try:
-                    await ChatService._store_message(
-                        thread_id, "system", json.dumps(request.user_profile), "profile"
-                    )
-                except Exception:
-                    logger.exception("Failed to store user profile")
+            # If user_profile provided, store it (No-op)
+            # if getattr(request, "user_profile", None):
+            #     try:
+            #         await ChatService._store_message(
+            #             thread_id, "system", json.dumps(request.user_profile), "profile"
+            #         )
+            #     except Exception:
+            #         logger.exception("Failed to store user profile")
 
             # Run the agent with augmented message (agent will analyze attachments via tool call)
             result = await run_agent(
@@ -161,14 +157,15 @@ class ChatService:
                 user_profile=request.user_profile,
                 is_dispute=request.is_dispute,
                 is_my_policies_chat=request.is_my_policies_chat,  # Indicate this is a my-policies related chat for agent context
+                is_guidance=request.is_guidance,
             )
 
             print(f"Agent returned result: {result}")
 
-            # Store assistant response
-            await ChatService._store_message(
-                thread_id, "assistant", result.get("assistant_response", ""), "text"
-            )
+            # Store assistant response (No-op)
+            # await ChatService._store_message(
+            #     thread_id, "assistant", result.get("assistant_response", ""), "text"
+            # )
 
             # Build response with thread_id, assistant_response and guidance
             response = ChatResponse(
@@ -189,182 +186,28 @@ class ChatService:
 
     @staticmethod
     async def _thread_exists(thread_id: str) -> bool:
-        """Check if a conversation thread exists in the database.
-
-        Queries the conversation_threads table to verify thread existence
-        before attempting to add messages to it.
-
-        Args:
-            thread_id: The thread ID to verify
-
-        Returns:
-            True if thread exists in database, False otherwise
-
-        Note:
-            Returns False if database query fails; errors are logged.
-        """
-        try:
-            async with AsyncSessionLocal() as session:
-                query = select(ConversationThread).where(
-                    ConversationThread.thread_id == thread_id
-                )
-                result = await session.execute(query)
-                return result.scalar_one_or_none() is not None
-        except Exception as e:
-            logger.error(f"Error checking thread existence: {str(e)}")
-            return False
+        """Check if a conversation thread exists (Always returns True to bypass)."""
+        return True
 
     @staticmethod
     async def _create_thread(thread_id: str) -> bool:
-        """Create a new conversation thread in the database.
-
-        Initializes a new ConversationThread record with metadata including
-        creation timestamp and agent type. Thread starts in active state.
-
-        Args:
-            thread_id: Unique identifier for the thread (typically UUID)
-
-        Returns:
-            True if thread created successfully, False otherwise
-
-        Side Effects:
-            Creates database record; logs success/failure
-        """
-        try:
-            async with AsyncSessionLocal() as session:
-                thread = ConversationThread(
-                    thread_id=thread_id,
-                    is_active=True,
-                    context_data={
-                        "created_at": datetime.utcnow().isoformat(),
-                        "agent_type": "insurance",
-                    },
-                )
-                session.add(thread)
-                await session.commit()
-                logger.info(f"Thread created: {thread_id}")
-                return True
-        except Exception as e:
-            logger.error(f"Error creating thread: {str(e)}", exc_info=True)
-            return False
+        """Create a new conversation thread (No-op)."""
+        return True
 
     @staticmethod
     async def _store_message(
         thread_id: str, role: str, content: str, message_type: str = "text"
     ) -> bool:
-        """Store a message in the conversation history.
-
-        Persists a message to the conversation_messages table and updates
-        the thread's updated_at timestamp. Supports different message types
-        for granular conversation tracking.
-
-        Args:
-            thread_id: The conversation thread ID
-            role: Message role - 'user', 'assistant', 'system', or 'tool'
-            content: The message content (text, JSON, etc.)
-            message_type: Type of message (default: 'text'):
-                - 'text': Regular text messages
-                - 'tool_call': Tool invocation by agent
-                - 'tool_result': Tool execution result
-                - 'profile': User profile data (stored as JSON)
-
-        Returns:
-            True if stored successfully, False otherwise
-
-        Side Effects:
-            Updates thread's updated_at timestamp
-            Logs errors if storage fails
-        """
-        try:
-            async with AsyncSessionLocal() as session:
-                message = ConversationMessage(
-                    thread_id=thread_id,
-                    role=role,
-                    content=content,
-                    message_type=message_type,
-                    context_data={
-                        "stored_at": datetime.utcnow().isoformat(),
-                    },
-                )
-                session.add(message)
-
-                # Update thread timestamp
-                thread_query = select(ConversationThread).where(
-                    ConversationThread.thread_id == thread_id
-                )
-                result = await session.execute(thread_query)
-                thread = result.scalar_one_or_none()
-                if thread:
-                    thread.updated_at = datetime.utcnow()
-
-                await session.commit()
-                return True
-        except Exception as e:
-            logger.error(f"Error storing message: {str(e)}", exc_info=True)
-            return False
+        """Store a message in the conversation history (No-op)."""
+        return True
 
     @staticmethod
     async def get_conversation_history(
         request: ConversationHistoryRequest,
     ) -> ConversationHistoryResponse:
-        """Retrieve conversation history for a thread.
-
-        Fetches all messages from a conversation thread in chronological order,
-        with optional pagination support.
-
-        Args:
-            request: ConversationHistoryRequest containing:
-            - thread_id: The thread to retrieve history for
-            - limit: Optional maximum number of messages (None = all)
-
-        Returns:
-            ConversationHistoryResponse containing:
-            - thread_id: The requested thread ID
-            - status: 'success' or 'error'
-            - history: List of messages with id, role, content, type, and timestamp
-            - error: Error message if status is 'error'
-
-        Note:
-            Messages are returned in chronological order (oldest first).
-            Returns empty list if thread has no messages.
-        """
-        try:
-            async with AsyncSessionLocal() as session:
-                query = (
-                    select(ConversationMessage)
-                    .where(ConversationMessage.thread_id == request.thread_id)
-                    .order_by(ConversationMessage.created_at)
-                )
-
-                if request.limit:
-                    query = query.limit(request.limit)
-
-                result = await session.execute(query)
-                messages = result.scalars().all()
-
-                history = [
-                    {
-                        "id": str(msg.id),
-                        "role": msg.role,
-                        "content": msg.content,
-                        "message_type": msg.message_type,
-                        "created_at": msg.created_at.isoformat(),
-                    }
-                    for msg in messages
-                ]
-
-                return ConversationHistoryResponse(
-                    thread_id=request.thread_id,
-                    status="success",
-                    history=history,
-                )
-
-        except Exception as e:
-            logger.error(
-                f"Error retrieving conversation history: {str(e)}", exc_info=True
-            )
-            return ConversationHistoryResponse(
-                thread_id=request.thread_id,
-                status="error",
-                error=str(e),
-            )
+        """Retrieve conversation history for a thread (Always returns empty)."""
+        return ConversationHistoryResponse(
+            thread_id=request.thread_id,
+            status="success",
+            history=[],
+        )
