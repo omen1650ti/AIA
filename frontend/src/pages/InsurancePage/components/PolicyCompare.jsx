@@ -305,9 +305,9 @@ export default function PolicyCompare({ policies = [] }) {
           }
 
           // Fallback to regex-based extraction if JSON fails or is not applicable
-          // Key-based JSON-like regex
-          const oldMatch = trimmed.match(/"old":\s*"([\s\S]*?)"(?=,\s*"new"|})/);
-          const newMatch = trimmed.match(/"new":\s*"([\s\S]*?)"(?=,\s*"guidance"|})/);
+          // Key-based JSON-like regex (more robust matching until end-quote)
+          const oldMatch = trimmed.match(/"old":\s*"((?:[^"\\]|\\.)*)"/);
+          const newMatch = trimmed.match(/"new":\s*"((?:[^"\\]|\\.)*)"/);
           if (oldMatch || newMatch) {
             return {
               old: oldMatch ? oldMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : null,
@@ -315,11 +315,11 @@ export default function PolicyCompare({ policies = [] }) {
             };
           }
 
-          // Markdown Section Extraction
-          const oldSec = (trimmed.match(/####\s*Old\s*Policy:?([\s\S]*?)(?=####\s*New\s*Policy:?|###\s*Key\s*Differences?|###\s*Conclusion?|$)/i) || [])[1];
-          const newSec = (trimmed.match(/####\s*New\s*Policy:?([\s\S]*?)(?=###\s*Key\s*Differences?|###\s*Conclusion?|$)/i) || [])[1];
-          const diffs  = (trimmed.match(/###\s*Key\s*Differences?([\s\S]*?)(?=###\s*Conclusion?|$)/i) || [])[1];
-          const conc   = (trimmed.match(/###\s*Conclusion?([\s\S]*)$/i) || [])[1];
+          // Markdown Section Extraction (Support ## and ####)
+          const oldSec = (trimmed.match(/#+\s*Old\s*Policy:?([\s\S]*?)(?=#+\s*New\s*Policy:?|#+\s*Key\s*Differences?|#+\s*Conclusion?|$)/i) || [])[1];
+          const newSec = (trimmed.match(/#+\s*New\s*Policy:?([\s\S]*?)(?=#+\s*Key\s*Differences?|#+\s*Conclusion?|$)/i) || [])[1];
+          const diffs  = (trimmed.match(/#+\s*Key\s*Differences?([\s\S]*?)(?=#+\s*Conclusion?|$)/i) || [])[1];
+          const conc   = (trimmed.match(/#+\s*Conclusion?([\s\S]*)$/i) || [])[1];
 
           if (oldSec || newSec) {
             let combined = (newSec || "").trim();
