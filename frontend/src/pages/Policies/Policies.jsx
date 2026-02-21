@@ -1,5 +1,9 @@
 import React, { useState, useMemo } from "react";
-import { useNavigate, useOutletContext, useSearchParams } from "react-router-dom";
+import {
+  useNavigate,
+  useOutletContext,
+  useSearchParams,
+} from "react-router-dom";
 import FilterBar from "../InsurancePage/components/FilterBar";
 import PolicyCard from "./components/PolicyCard";
 import BouncingLoader from "../../components/BouncingLoader";
@@ -22,8 +26,8 @@ const MY_POLICIES = [
         secure_benefit: true,
         plus_benefit: true,
         restore_benefit: true,
-        protect_benefit: true
-      }
+        protect_benefit: true,
+      },
     },
     base_price: 10620,
     status: "Active",
@@ -32,7 +36,7 @@ const MY_POLICIES = [
     highlightIcon: <Zap size={14} className="text-amber-500" />,
     color: "#0ea5e9", // Sky blue for HDFC
     icon: <ShieldCheck size={24} />,
-    isMyPolicy: true
+    isMyPolicy: true,
   },
   {
     id: "62963426202600",
@@ -48,8 +52,8 @@ const MY_POLICIES = [
         reassure_forever: true,
         booster_plus: true,
         lock_the_clock: true,
-        live_healthy: true
-      }
+        live_healthy: true,
+      },
     },
     base_price: 5973,
     status: "Active",
@@ -58,12 +62,16 @@ const MY_POLICIES = [
     highlightIcon: <Clock size={14} className="text-violet-500" />,
     color: "#8b5cf6", // Violet for Niva Bupa
     icon: <Activity size={24} />,
-    isMyPolicy: true
-  }
+    isMyPolicy: true,
+  },
 ];
 
 function Policies() {
-  const { filters: globalFilters, updateFilter, setFilters: setGlobalFilters } = useOutletContext();
+  const {
+    filters: globalFilters,
+    updateFilter,
+    setFilters: setGlobalFilters,
+  } = useOutletContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = searchParams.get("tab") || "all";
   const navigate = useNavigate();
@@ -82,7 +90,11 @@ function Policies() {
   // Use global filters if available, otherwise fallback to local filters
   const activeFilters = globalFilters || localFilters;
 
-  const { data: policiesData, isLoading, error } = useGetPolicies(activeFilters);
+  const {
+    data: policiesData,
+    isLoading,
+    error,
+  } = useGetPolicies(activeFilters);
   const apiPolicies = policiesData || [];
 
   const policies = useMemo(() => {
@@ -94,10 +106,15 @@ function Policies() {
     setSearchParams({ tab: newTab });
   };
 
-  const activeUpdateFilter = updateFilter || ((e) => {
-    const { name, value } = e.target;
-    setLocalFilters((prev) => ({ ...prev, [name]: value === "" ? null : value }));
-  });
+  const activeUpdateFilter =
+    updateFilter ||
+    ((e) => {
+      const { name, value } = e.target;
+      setLocalFilters((prev) => ({
+        ...prev,
+        [name]: value === "" ? null : value,
+      }));
+    });
 
   const resetFilters = () => {
     const emptyFilters = {
@@ -120,27 +137,37 @@ function Policies() {
       <div className="w-full bg-white border-b border-slate-100 px-8 pt-8 pb-0">
         <div className="max-w-6xl mx-auto w-full">
           <div className="flex items-center gap-3 mb-6">
-            <h1 className="text-2xl font-bold text-slate-900 m-0">Healthcare Policies</h1>
+            <h1 className="text-2xl font-bold text-slate-900 m-0">
+              Healthcare Policies
+            </h1>
           </div>
-          
+
           <div className="flex gap-10">
-            <button 
+            <button
               onClick={() => setTab("all")}
               className={`pb-4 text-[15px] font-bold transition-all relative border-none bg-none cursor-pointer ${
-                tab === "all" ? "text-violet-600" : "text-slate-400 hover:text-slate-600"
+                tab === "all"
+                  ? "text-violet-600"
+                  : "text-slate-400 hover:text-slate-600"
               }`}
             >
               All Policies
-              {tab === "all" && <div className="absolute bottom-0 left-0 right-0 h-1 bg-violet-600 rounded-t-full" />}
+              {tab === "all" && (
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-violet-600 rounded-t-full" />
+              )}
             </button>
-            <button 
+            <button
               onClick={() => setTab("mine")}
               className={`pb-4 text-[15px] font-bold transition-all relative border-none bg-none cursor-pointer ${
-                tab === "mine" ? "text-violet-600" : "text-slate-400 hover:text-slate-600"
+                tab === "mine"
+                  ? "text-violet-600"
+                  : "text-slate-400 hover:text-slate-600"
               }`}
             >
               My Policies
-              {tab === "mine" && <div className="absolute bottom-0 left-0 right-0 h-1 bg-violet-600 rounded-t-full" />}
+              {tab === "mine" && (
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-violet-600 rounded-t-full" />
+              )}
             </button>
           </div>
         </div>
@@ -177,7 +204,7 @@ function Policies() {
             </button>
           </div>
         ) : policies.length > 0 ? (
-          <div className="grid grid-cols-1 gap-6 w-full justify-items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full px-4 md:px-8">
             {policies.map((policy, idx) => (
               <PolicyCard
                 key={policy.id}
@@ -194,11 +221,13 @@ function Policies() {
               <SearchX size={48} className="text-slate-400" />
             </div>
             <h3 className="text-xl font-bold text-slate-900">
-              {tab === "mine" ? "No personal policies found" : "No matching policies found"}
+              {tab === "mine"
+                ? "No personal policies found"
+                : "No matching policies found"}
             </h3>
             <p className="text-slate-500 max-w-md">
-              {tab === "mine" 
-                ? "You don't have any active policies linked to your account yet." 
+              {tab === "mine"
+                ? "You don't have any active policies linked to your account yet."
                 : "We couldn't find any insurance plans matching your current filters. Try adjusting your preferences or resetting the filters."}
             </p>
             {tab === "all" && (
