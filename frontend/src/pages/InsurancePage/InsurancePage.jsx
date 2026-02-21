@@ -35,8 +35,11 @@ function InsurancePage() {
                   {TOP_PICKS.length} MATCHES
                 </span>
               </div>
-              <button className="flex items-center gap-1 bg-none border-none cursor-pointer text-sm text-violet-600 font-semibold font-sans">
-                View all results <ChevronRightIcon />
+              <button 
+                onClick={() => navigate("/policies")}
+                className="flex items-center gap-1 bg-none border-none cursor-pointer text-sm text-violet-600 font-semibold font-sans hover:text-violet-800 transition-colors"
+              >
+                View all  <ChevronRightIcon />
               </button>
             </div>
 

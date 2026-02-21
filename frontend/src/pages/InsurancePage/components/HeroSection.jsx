@@ -31,6 +31,7 @@ function HeroSection() {
           {CATEGORIES.map((cat) => (
             <button
               key={cat.label}
+              onClick={() => navigate("/policies")}
               className="px-4 py-4 bg-white border border-purple-100 rounded-2xl cursor-pointer text-left
                          shadow-[0_1px_4px_rgba(109,40,217,0.06)]
                          hover:shadow-[0_4px_16px_rgba(124,58,237,0.14)] hover:border-purple-400
