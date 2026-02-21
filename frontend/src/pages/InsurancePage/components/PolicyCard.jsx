@@ -19,10 +19,6 @@ const PolicyCard = ({ policy, onClick }) => {
     >
       {/* Left Section: Icon and Details */}
       <div className="flex items-start gap-6 w-full md:w-auto">
-        {/* Logo Placeholder */}
-        <div className="bg-linear-to-br from-indigo-600 to-violet-700 text-white w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold shadow-lg shadow-indigo-200 shrink-0">
-          {jsonb_data?.plan_name?.charAt(0) || "P"}
-        </div>
 
         <div className="flex flex-col gap-3 grow">
           {/* Title and Badges */}
