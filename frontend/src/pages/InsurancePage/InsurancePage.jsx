@@ -1,20 +1,18 @@
-import React from "react";
-import { useOutletContext } from "react-router-dom";
-
-// Components
-import NavBar from "../../components/NavBar";
-import FilterBar from "./components/FilterBar";
-import HeroSection from "./components/HeroSection";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import PolicyCard from "./components/PolicyCard";
-import GridPolicyCard from "./components/GridPolicyCard";
+import HeroSection from "./components/HeroSection";
 import { ChevronRightIcon } from "./components/Icons";
 
 import { TOP_PICKS } from "./util/constants";
 import PolicyCompare from "./components/PolicyCompare";
 import { S } from "./styles/theme";
+import { useGetPolicies } from "../../hooks/usePolicies";
+import BouncingLoader from "../../components/BouncingLoader";
 
 function InsurancePage() {
   const { policies, filters, updateFilter, setFilters } = useOutletContext();
+  const { data: policiesData, isLoading } = useGetPolicies();
+  const navigate = useNavigate()
   return (
     <div
       style={{
@@ -43,9 +41,19 @@ function InsurancePage() {
             </div>
 
             <div className="flex flex-col gap-3">
-              {TOP_PICKS.map((p) => (
-                <PolicyCard key={p.id} p={p} />
-              ))}
+              {isLoading ? (
+                <BouncingLoader />
+              ) : (
+                policiesData
+                  ?.slice(0, 3)
+                  .map((policy) => (
+                    <PolicyCard
+                      key={policy.id}
+                      policy={policy}
+                      onClick={() => navigate(`/policy-details/${policy.id}`)}
+                    />
+                  ))
+              )}
             </div>
           </div>
 
