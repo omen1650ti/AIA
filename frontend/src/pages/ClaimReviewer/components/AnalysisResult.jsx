@@ -1,7 +1,30 @@
+import React from "react";
 import BouncingLoader from "../../../components/BouncingLoader";
 import { S } from "../../InsurancePage/styles/theme";
 
 function AnalysisResult({ result, isLoading, isSuccess, onReset }) {
+  const [msgIndex, setMsgIndex] = React.useState(0);
+  
+  const loadingMessages = [
+    "Analyzing Aadhar Card for identity verification...",
+    "Reviewing Insurance Plan Document for coverage details...",
+    "Extracting information from Discharge Summary...",
+    "Validating Medical Certificate with hospital records...",
+    "Calculating final claim amount from bills and invoices...",
+    "Running final AI cross-check on all documents..."
+  ];
+
+  React.useEffect(() => {
+    let interval;
+    if (isLoading) {
+      setMsgIndex(0);
+      interval = setInterval(() => {
+        setMsgIndex((prev) => (prev + 1) % loadingMessages.length);
+      }, 25000); // Cycle every 25s for ~2.5 mins total (6 messages)
+    }
+    return () => clearInterval(interval);
+  }, [isLoading]);
+
   if (isLoading) {
     return (
       <div style={{
@@ -19,10 +42,13 @@ function AnalysisResult({ result, isLoading, isSuccess, onReset }) {
         <div className="mb-6">
           <BouncingLoader />
         </div>
-        <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>Analyzing Documents...</h3>
-        <p style={{ color: S.textSub, fontSize: 14, maxWidth: 280 }}>
-          Our AI is cross-referencing your documents with policy terms and historical data.
+        <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>AI Analysis in Progress</h3>
+        <p style={{ color: S.textSub, fontSize: 14, maxWidth: 280, minHeight: "3em" }}>
+          {loadingMessages[msgIndex]}
         </p>
+        <div style={{ marginTop: 20, fontSize: 12, color: S.purple, fontWeight: 600 }}>
+          This may take a few minutes...
+        </div>
       </div>
     );
   }

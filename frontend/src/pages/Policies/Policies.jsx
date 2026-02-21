@@ -132,10 +132,10 @@ function Policies() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-6 pb-20 min-h-screen bg-[#fafbfc] w-full">
+    <div className="flex flex-col h-full overflow-hidden bg-[#fafbfc] w-full">
       {/* Header & Tabs */}
-      <div className="w-full bg-white border-b border-slate-100 px-8 pt-8 pb-0">
-        <div className="max-w-6xl mx-auto w-full">
+      <div className="w-full bg-white border-b border-slate-100 px-8 pt-8 pb-0 ">
+        <div className="max-w-6xl mx-auto w-full overflow-hidden">
           <div className="flex items-center gap-3 mb-6">
             <h1 className="text-2xl font-bold text-slate-900 m-0">
               Healthcare Policies
@@ -170,20 +170,22 @@ function Policies() {
               )}
             </button>
           </div>
+
+          {tab === "all" && (
+            <div className="pt-2 pb-6">
+              <FilterBar
+                filters={activeFilters}
+                updateFilter={activeUpdateFilter}
+                setFilters={resetFilters}
+              />
+            </div>
+          )}
         </div>
       </div>
 
-      {tab === "all" && (
-        <div className="w-full max-w-6xl bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mt-2">
-          <FilterBar
-            filters={activeFilters}
-            updateFilter={activeUpdateFilter}
-            setFilters={resetFilters}
-          />
-        </div>
-      )}
-
-      <div className="flex flex-col items-center gap-4 w-full max-w-6xl mt-4">
+      {/* Scrollable Listing Content */}
+      <div className="flex-1 overflow-y-auto w-full flex flex-col items-center pt-8 pb-10">
+        <div className="flex flex-col items-center gap-4 w-full max-w-6xl">
         {isLoading && tab === "all" ? (
           <div className="flex flex-col items-center gap-6 mt-24">
             <BouncingLoader size="h-3 w-3" spacing="space-x-2" />
@@ -240,6 +242,7 @@ function Policies() {
             )}
           </div>
         )}
+        </div>
       </div>
     </div>
   );

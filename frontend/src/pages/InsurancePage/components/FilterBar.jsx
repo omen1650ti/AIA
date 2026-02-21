@@ -4,88 +4,86 @@ import { Search, ChevronDown, RefreshCw } from "lucide-react";
 
 function FilterBar({ filters, updateFilter, setFilters }) {
   const inputClassName =
-    "px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 bg-white outline-none font-sans cursor-pointer focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 transition-all hover:border-slate-300";
+    "px-3 py-1.5 border border-slate-200 rounded-lg text-sm text-slate-700 bg-slate-50/50 outline-none focus:bg-white focus:border-indigo-500 transition-all hover:bg-white";
 
   return (
-    <div className="flex items-center gap-4 px-8 py-5 bg-white flex-wrap shrink-0">
-      <div className="flex items-center gap-2 text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl mr-2">
-        <FilterIcon />
-        <span className="font-bold text-sm tracking-tight">Filters</span>
-      </div>
-
-      <div className="relative grow max-w-xs">
+    <div className="flex items-center gap-4 flex-wrap">
+      {/* Search Input */}
+      <div className="relative flex-1 min-w-[200px] max-w-sm">
         <Search
-          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-          size={18}
+          className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"
+          size={14}
         />
         <input
           type="text"
           name="plan_name"
-          placeholder="Search plan name..."
+          placeholder="Search plans..."
           value={filters.plan_name || ""}
           onChange={updateFilter}
-          className={`${inputClassName} pl-11 w-full`}
+          className={`${inputClassName} pl-8 w-full`}
         />
       </div>
 
+      {/* Room Type Select */}
       <div className="relative">
         <select
           name="room_rent_type"
           value={filters.room_rent_type || ""}
           onChange={updateFilter}
-          className={`${inputClassName} appearance-none pr-10`}
+          className={`${inputClassName} appearance-none pr-8 min-w-[130px]`}
         >
           <option value="">Room Type</option>
-          <option value="Single Private Room">Single Private Room</option>
+          <option value="Single Private Room">Private Room</option>
           <option value="Shared Room">Shared Room</option>
           <option value="Any Room">Any Room</option>
         </select>
         <ChevronDown
-          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-          size={16}
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+          size={14}
         />
       </div>
 
-      <div className="flex items-center gap-3">
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-          Waiting Period
+      {/* Waiting Period Input */}
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+          Waiting:
         </span>
         <input
           type="number"
           name="min_waiting_period"
-          placeholder="Max years"
+          placeholder="Max Yrs"
           value={filters.min_waiting_period || ""}
           onChange={updateFilter}
           className={`${inputClassName} w-[110px]`}
         />
       </div>
 
+      {/* Sort By Select */}
       <div className="relative">
         <select
           name="sort_by"
           value={filters.sort_by || ""}
           onChange={updateFilter}
-          className={`${inputClassName} appearance-none pr-10`}
+          className={`${inputClassName} appearance-none pr-8 min-w-[140px]`}
         >
           <option value="">Sort By</option>
-          <option value="base_price">Premium: Low → High</option>
+          <option value="base_price">Price: Low to High</option>
           <option value="claim_settlement_ratio_percent">
-            Claim Ratio: High → Low
+            Claim Ratio: High
           </option>
-          <option value="cashless_hospitals">Cashless Hospitals</option>
+          <option value="cashless_hospitals">Top Networks</option>
         </select>
         <ChevronDown
-          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-          size={16}
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+          size={14}
         />
       </div>
 
       <button
         onClick={setFilters}
-        className="flex items-center gap-2 px-5 py-2.5 bg-slate-50 text-slate-600 border border-slate-200 rounded-xl text-sm font-bold hover:bg-slate-100 hover:text-slate-900 transition-all ml-auto active:scale-95"
+        className="text-xs font-bold text-slate-400 hover:text-red-500 transition-colors px-2"
       >
-        <RefreshCw size={16} />
-        Reset
+        Clear All
       </button>
     </div>
   );

@@ -2,11 +2,9 @@ import { postAPI } from './Axios';
 
 // Mock service for claim analysis
 export const analyzeClaim = async (claimData) => {
-  // Simulating API call
-  console.log("Analyzing claim with data:", claimData);
-  
-  // Artificial delay to show loaders
-  await new Promise(resolve => setTimeout(resolve, 3000));
+  // Artificial delay to show the cycling loader messages (requested for ~2.5 mins experience)
+  // For demo purposes, we cycle for 15 seconds
+  await new Promise(resolve => setTimeout(resolve, 15000));
   
   return {
     id: "CLM-" + Math.random().toString(36).substr(2, 9).toUpperCase(),
@@ -14,11 +12,12 @@ export const analyzeClaim = async (claimData) => {
     status: "Highly Likely",
     score: 88,
     analysis: [
-      "All 5 required documents have been uploaded and verified.",
-      "Policy #POL-8821 coverage matches the 'Accident' claim type.",
+      "All 5 required documents (Aadhar, Plan, Discharge, Medical Cert, Bill) verified.",
+      "Aadhar Card verified for identity verification.",
+      "Policy coverage matches the reported claim type.",
       "Incident timestamp is within the active policy period.",
       "Medical records correctly reflect the reported injuries.",
-      "No conflicting historical claims found for this policy holder."
+      "All bills have been cross-verified with policy limits."
     ],
     recommendations: [
       "Standard processing recommended.",

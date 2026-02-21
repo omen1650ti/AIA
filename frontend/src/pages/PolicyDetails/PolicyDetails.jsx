@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { S } from "../InsurancePage/styles/theme";
 import {
   CheckIcon,
@@ -22,6 +23,7 @@ const MY_POLICIES = [
       claim_settlement_ratio_percent: 99,
       cashless_hospitals: 12000,
       existing_waiting_period_yrs: 3,
+      ncb_percent_per_year: 25,
       features: {
         secure_benefit: true,
         plus_benefit: true,
@@ -31,9 +33,9 @@ const MY_POLICIES = [
         claim_settlement_ratio_percent: 99
       },
       tiers: [
-        { label: "Silver", price: 10620, coverage: "5 Lakhs" },
-        { label: "Gold", price: 12450, coverage: "10 Lakhs" },
-        { label: "Platinum", price: 15600, coverage: "20 Lakhs" }
+        { label: "Silver", price: 10620, sum_insured: 500000 },
+        { label: "Gold", price: 12450, sum_insured: 1000000 },
+        { label: "Platinum", price: 15600, sum_insured: 2000000 }
       ]
     },
     base_price: 10620,
@@ -53,6 +55,7 @@ const MY_POLICIES = [
       claim_settlement_ratio_percent: 96,
       cashless_hospitals: 10000,
       existing_waiting_period_yrs: 3,
+      ncb_percent_per_year: 25,
       features: {
         reassure_forever: true,
         booster_plus: true,
@@ -62,9 +65,9 @@ const MY_POLICIES = [
         claim_settlement_ratio_percent: 96
       },
       tiers: [
-        { label: "Base", price: 5973, coverage: "5 Lakhs" },
-        { label: "Comfort", price: 7200, coverage: "10 Lakhs" },
-        { label: "Elite", price: 9500, coverage: "20 Lakhs" }
+        { label: "Base", price: 5973, sum_insured: 500000 },
+        { label: "Comfort", price: 7200, sum_insured: 1000000 },
+        { label: "Elite", price: 9500, sum_insured: 2000000 }
       ]
     },
     base_price: 5973,
@@ -210,6 +213,7 @@ const policyDataaa = {
 
 const PolicyDetails = () => {
   const { policyId } = useParams();
+  const navigate = useNavigate();
   const [billAmount, setBillAmount] = useState("2,50,000");
   const [isSimpleView, setIsSimpleView] = useState(true);
   const { data: apiPolicyData, isLoading, isError } = useGetPolicyDetail(policyId);
@@ -360,11 +364,31 @@ const PolicyDetails = () => {
         fontFamily: S.font,
       }}
     >
-      {/* <PageHeader /> */}
+      <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
+        {/* Navigation Header */}
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <button
+            onClick={() => navigate(`/policies?tab=${policyData?.isMyPolicy ? "mine" : "all"}`)}
+            style={{
+              padding: "8px",
+              borderRadius: "50%",
+              border: "1px solid #e2e8f0",
+              background: "white",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              boxShadow: "0 2px 5px rgba(0,0,0,0.05)"
+            }}
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 m-0">Policy Details</h1>
+          </div>
+        </div>
 
-      <div
-        style={{ gap: 32 }}
-      >
         {/* Left Column */}
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           {/* Main Card */}
@@ -379,9 +403,6 @@ const PolicyDetails = () => {
               }}
             >
               <div style={{ display: "flex", gap: 16 }}>
-                <div style={iconBoxStyle}>
-                  <FirstAidIcon />
-                </div>
                 <div>
                   <div
                     style={{
@@ -391,7 +412,7 @@ const PolicyDetails = () => {
                       marginBottom: 4,
                     }}
                   >
-                    <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>
+                    <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0, color: S.text }}>
                       {data.plan_name}
                     </h2>
                     <span style={tagStyle}>TOP MATCH</span>
@@ -408,8 +429,8 @@ const PolicyDetails = () => {
                     <div
                       style={{ display: "flex", alignItems: "center", gap: 12 }}
                     >
-                      <span>🛡️ {data.plan_type}</span>
-                      <span>⭐ 4.9 (2.4k reviews)</span>
+                      <span className="font-medium">{data.plan_type}</span>
+                      <span className="text-amber-500 font-bold">4.9 (2.4k reviews)</span>
                     </div>
                     <div
                       style={{
@@ -420,10 +441,10 @@ const PolicyDetails = () => {
                       }}
                     >
                       <span>
-                        Waiting: <b>{data.existing_waiting_period_yrs} Yr</b>
+                        Waiting period: <b>{data.existing_waiting_period_yrs} years</b>
                       </span>
                       <span>
-                        NCB: <b>{data.ncb_percent_per_year}% / yr</b>
+                        NCB: <b>{data.ncb_percent_per_year}% / year</b>
                       </span>
                     </div>
                   </div>

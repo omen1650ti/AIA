@@ -4,14 +4,13 @@ import DocumentUpload from "./components/DocumentUpload";
 import AnalysisResult from "./components/AnalysisResult";
 import { useClaimReview } from "../../hooks/useClaimReview";
 
-const REQUIRED_DOCS = [
-  "Insurance Policy Document",
-  "Incident/Accident Report",
-  "Original Medical Bills",
-  "Proof of Loss Form",
-  "Identity Verification (KYC)"
-];
-
+const REQUIRED_DOCS =[
+  "Aadhar Card",
+  "Plan Document",
+  "Discharge Summary",
+  "Medical Certificate",
+  "Bill"
+]
 function ClaimReviewer() {
   const [uploadedDocs, setUploadedDocs] = useState({});
   const { mutate: runAnalysis, data: analysisResult, isPending, isSuccess, reset } = useClaimReview();
