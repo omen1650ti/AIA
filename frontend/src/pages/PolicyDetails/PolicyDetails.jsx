@@ -692,7 +692,7 @@ const PolicyDetails = () => {
                   <div
                     style={{
                       fontSize: 11,
-                      fontWeight: 800,
+                      fontWeight: 700,
                       color: "#166534",
                       marginBottom: 8,
                       display: "flex",
@@ -700,7 +700,7 @@ const PolicyDetails = () => {
                       gap: 6,
                     }}
                   >
-                    <CheckIcon color="#166534" /> KEY FEATURES
+                    KEY FEATURES
                   </div>
                   <ul style={listStyle}>
                     {data.features.maternity_cover && (
@@ -722,7 +722,7 @@ const PolicyDetails = () => {
                   <div
                     style={{
                       fontSize: 11,
-                      fontWeight: 800,
+                      fontWeight: 700,
                       color: "#991b1b",
                       marginBottom: 8,
                       display: "flex",
@@ -730,7 +730,7 @@ const PolicyDetails = () => {
                       gap: 6,
                     }}
                   >
-                    <span style={{ color: "#991b1b" }}>ⓧ</span> IMPORTANT NOTES
+                     IMPORTANT NOTES
                   </div>
                   <ul style={listStyle}>
                     {data.features.external_copay_percent > 0 && (
@@ -757,7 +757,6 @@ const PolicyDetails = () => {
                   marginBottom: 16,
                 }}
               >
-                <span style={{ fontSize: 18 }}>🎭</span>
                 <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>
                   Available Riders
                 </h3>

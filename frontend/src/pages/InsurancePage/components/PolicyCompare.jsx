@@ -138,26 +138,19 @@ function PolicyDropdown({ label, value, onChange, exclude, policies }) {
 function AnalysisPanel({ label, policy, analysis, accent }) {
   if (!policy) return null;
 
-  // Simple Markdown Parser for the specific structure returned by the backend
+  // Simple Text Parser to handle AI output and clean up markdowns
   const renderContent = (text) => {
     if (!text) return <p style={{ color: TEXT_MUTED }}>No analysis available.</p>;
 
-    // Split by sections or tables
-    const lines = text.split("\n");
+    // Strip all markdown bold markers ** globally for a cleaner look as requested
+    const cleanText = text.replace(/\*\*/g, "");
+    const lines = cleanText.split("\n");
     
     return lines.map((line, i) => {
-      // Bold handling
-      const parts = line.split(/(\*\*.*?\*\*)/g);
-      const renderedLine = parts.map((part, j) => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-          return <strong key={j}>{part.slice(2, -2)}</strong>;
-        }
-        return part;
-      });
-
       // Headers
-      if (line.startsWith('## ')) {
-        return <h3 key={i} style={{ fontSize: 16, fontWeight: 800, color: accent, margin: "20px 0 10px 0", borderBottom: `1px solid ${BORDER}`, paddingBottom: 4 }}>{line.replace('## ', '')}</h3>;
+      if (line.startsWith('## ') || line.startsWith('### ')) {
+        const title = line.replace(/^#+\s*/, "");
+        return <h3 key={i} style={{ fontSize: 16, fontWeight: 800, color: accent, margin: "20px 0 10px 0", borderBottom: `1px solid ${BORDER}`, paddingBottom: 4 }}>{title}</h3>;
       }
 
       // Check for table rows (very simple)
@@ -173,22 +166,24 @@ function AnalysisPanel({ label, policy, analysis, accent }) {
         );
       }
 
-      // List items
-      if (line.trim().startsWith('- ')) {
+      // List items (handle both - and •)
+      const trimmed = line.trim();
+      if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+        const content = trimmed.replace(/^[-•]\s*/, "");
         return (
           <div key={i} style={{ display: "flex", gap: 8, margin: "4px 0", fontSize: 13, color: TEXT_SUB }}>
             <span style={{ color: accent, fontWeight: 800 }}>•</span>
-            <span>{renderedLine}</span>
+            <span>{content}</span>
           </div>
         );
       }
 
       // Empty lines
-      if (!line.trim()) return <div key={i} style={{ height: 8 }} />;
+      if (!trimmed) return <div key={i} style={{ height: 8 }} />;
 
       return (
         <p key={i} style={{ fontSize: 13, lineHeight: 1.6, color: TEXT_SUB, margin: "4px 0" }}>
-          {renderedLine}
+          {line}
         </p>
       );
     });
@@ -267,57 +262,86 @@ export default function PolicyCompare({ policies = [] }) {
     });
   };
 
-  // Extract results from nested JSON
+  // Extract results from nested JSON or raw markdown
   const results = React.useMemo(() => {
     if (!compareMutation.isSuccess || !compareMutation.data) return null;
     try {
       const resp = compareMutation.data;
-      console.log("Original Comparison Response:", resp);
+      console.log("Comparison Response:", resp);
       
-      let innerStr = resp.assistant_response;
-      if (!innerStr) return null;
+      const assistantRaw = resp.assistant_response;
+      if (!assistantRaw) return null;
 
-      if (typeof innerStr === 'string') {
-        // Aggressively clean the string to make it valid JSON
-        // The backend seems to send double braces {{ }} instead of { }
-        let cleaned = innerStr.trim();
-        
-        // Replace double braces with single braces globally if they appear to be defining objects
-        // We do this cautiously but effectively for this specific format
-        cleaned = cleaned.replace(/{{/g, '{').replace(/}}/g, '}');
-        
-        try {
-          const inner = JSON.parse(cleaned);
-          const content = inner.assistant_response || inner;
-          
-          if (content && (content.old || content.new)) {
-            return {
-              old: content.old || null,
-              new: content.new || null
-            };
+      /**
+       * Deeply searches for 'old' and 'new' keys in an object or string.
+       * Handles double-bracing, stringified JSON, and deep nesting.
+       */
+      const deepExtract = (val) => {
+        if (!val) return null;
+
+        // If it's an object, search its keys
+        if (typeof val === 'object') {
+          if (val.old || val.new) {
+            return { old: val.old || null, new: val.new || null };
           }
-        } catch (innerErr) {
-          console.warn("JSON.parse failed on cleaned string, trying fallback...", innerErr);
+          // Search one level deeper for keys likes assistant_response
+          for (const key in val) {
+            const found = deepExtract(val[key]);
+            if (found) return found;
+          }
+          return null;
+        }
+
+        // If it's a string, it might be JSON or Markdown
+        if (typeof val === 'string') {
+          const trimmed = val.trim();
           
-          // Fallback: Try to manually extract old and new strings using regex if JSON.parse fails
-          const oldMatch = cleaned.match(/"old":\s*"([\s\S]*?)"(?=,\s*"new"|})/);
-          const newMatch = cleaned.match(/"new":\s*"([\s\S]*?)"(?=,\s*"guidance"|})/);
-          
+          // Attempt JSON parse (handling {{ }})
+          if (trimmed.startsWith('{')) {
+            try {
+              const jsonReady = trimmed.replace(/{{/g, '{').replace(/}}/g, '}');
+              return deepExtract(JSON.parse(jsonReady));
+            } catch (e) { /* ignore and continue to markdown */ }
+          }
+
+          // Fallback to regex-based extraction if JSON fails or is not applicable
+          // Key-based JSON-like regex
+          const oldMatch = trimmed.match(/"old":\s*"([\s\S]*?)"(?=,\s*"new"|})/);
+          const newMatch = trimmed.match(/"new":\s*"([\s\S]*?)"(?=,\s*"guidance"|})/);
           if (oldMatch || newMatch) {
             return {
               old: oldMatch ? oldMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : null,
               new: newMatch ? newMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : null
             };
           }
+
+          // Markdown Section Extraction
+          const oldSec = (trimmed.match(/####\s*Old\s*Policy:?([\s\S]*?)(?=####\s*New\s*Policy:?|###\s*Key\s*Differences?|###\s*Conclusion?|$)/i) || [])[1];
+          const newSec = (trimmed.match(/####\s*New\s*Policy:?([\s\S]*?)(?=###\s*Key\s*Differences?|###\s*Conclusion?|$)/i) || [])[1];
+          const diffs  = (trimmed.match(/###\s*Key\s*Differences?([\s\S]*?)(?=###\s*Conclusion?|$)/i) || [])[1];
+          const conc   = (trimmed.match(/###\s*Conclusion?([\s\S]*)$/i) || [])[1];
+
+          if (oldSec || newSec) {
+            let combined = (newSec || "").trim();
+            if (diffs) combined += `\n\n### Key Differences\n${diffs.trim()}`;
+            if (conc)  combined += `\n\n### Conclusion\n${conc.trim()}`;
+            return { old: oldSec?.trim() || "Details not found.", new: combined || "Details not found." };
+          }
         }
-      } else if (typeof innerStr === 'object') {
-        const content = innerStr.assistant_response || innerStr;
+        return null;
+      };
+
+      const extracted = deepExtract(assistantRaw);
+      
+      // Final fallback: show raw text split in half if absolutely nothing found
+      if (!extracted && typeof assistantRaw === 'string' && assistantRaw.length > 50) {
         return {
-          old: content?.old || null,
-          new: content?.new || null
+          old: assistantRaw.substring(0, assistantRaw.length / 2) + "...",
+          new: "..." + assistantRaw.substring(assistantRaw.length / 2)
         };
       }
-      return null;
+
+      return extracted;
     } catch (e) {
       console.error("Overall parsing failed:", e);
       return null;
@@ -359,7 +383,7 @@ export default function PolicyCompare({ policies = [] }) {
         }}>
           {/* Policy 1 */}
           <PolicyDropdown
-            label="Current Policy"
+            label="Old Policy"
             value={p1Id}
             onChange={(id) => { p1SetId(id); compareMutation.reset(); }}
             exclude={p2Id}
