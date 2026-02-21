@@ -8,6 +8,7 @@ function NavBar() {
   { label: "Home", path: "/" },
   { label: "Policies", path: "/policies" },
   { label: "Review Claim", path: "/claim-reviewer" },
+  { label: "Analyze Dispute", path: "/dispute" },
 ];
   return (
     <header
