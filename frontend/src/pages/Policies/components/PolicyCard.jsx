@@ -18,14 +18,6 @@ const PolicyCard = ({ policy, onClick }) => {
     >
       {/* Top Section: Icon and Title */}
       <div className="flex flex-col gap-5">
-        <div className="flex justify-between items-start">
-          <div className="bg-linear-to-br from-indigo-600 to-violet-700 text-white w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold shadow-lg shadow-indigo-100 group-hover:scale-110 transition-transform duration-300">
-            {jsonb_data?.plan_name?.charAt(0) || "P"}
-          </div>
-          <span className="px-3 py-1 bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-indigo-100/50">
-            {jsonb_data?.plan_type}
-          </span>
-        </div>
 
         <div className="flex flex-col gap-2">
           <h3 className="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight">
