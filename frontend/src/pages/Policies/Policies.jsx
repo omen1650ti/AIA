@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   useNavigate,
   useOutletContext,
@@ -81,8 +81,30 @@ function Policies() {
     limit: 100,
     plan_name: null,
     room_rent_type: null,
+    min_sum_insured: null,
+    max_sum_insured: null,
     min_waiting_period: null,
     max_waiting_period: null,
+    min_ncb: null,
+    max_ncb: null,
+    min_child_age: null,
+    max_child_age: null,
+    min_claim_settlement: null,
+    min_cashless_hospitals: null,
+    free_checkup: null,
+    maternity_cover: null,
+    ayush: null,
+    air_evacuation: null,
+    home_hospitalization: null,
+    e_consultation: null,
+    baby_addition: null,
+    newborn_baby_cover: null,
+    daily_cash_allowance: null,
+    animal_bite_vaccination: null,
+    pre_existing_illness: null,
+    personal_accident_care: null,
+    premium_care: null,
+    wait_period_modification: null,
     sort_by: null,
     sort_order: "asc",
   });
@@ -101,6 +123,77 @@ function Policies() {
     if (tab === "mine") return MY_POLICIES;
     return apiPolicies;
   }, [tab, apiPolicies]);
+
+  // Sync state with URL params
+  useEffect(() => {
+    const params = Object.fromEntries(searchParams.entries());
+
+    // Define valid filter keys and their expected types
+    const filterMapping = {
+      plan_name: "string",
+      room_rent_type: "string",
+      min_sum_insured: "number",
+      max_sum_insured: "number",
+      min_waiting_period: "number",
+      max_waiting_period: "number",
+      min_ncb: "number",
+      max_ncb: "number",
+      min_child_age: "number",
+      max_child_age: "number",
+      min_claim_settlement: "number",
+      min_cashless_hospitals: "number",
+      free_checkup: "boolean",
+      maternity_cover: "boolean",
+      ayush: "boolean",
+      air_evacuation: "boolean",
+      home_hospitalization: "boolean",
+      e_consultation: "boolean",
+      baby_addition: "boolean",
+      newborn_baby_cover: "boolean",
+      daily_cash_allowance: "boolean",
+      animal_bite_vaccination: "boolean",
+      pre_existing_illness: "boolean",
+      personal_accident_care: "boolean",
+      premium_care: "boolean",
+      wait_period_modification: "boolean",
+      sort_by: "string",
+      sort_order: "string",
+      limit: "number",
+      skip: "number",
+    };
+
+    let hasChanges = false;
+    const currentFilters = globalFilters || localFilters;
+    const updatedFilters = { ...currentFilters };
+
+    Object.entries(filterMapping).forEach(([key, type]) => {
+      const paramValue = params[key];
+      if (paramValue !== undefined) {
+        let processedValue = paramValue === "null" ? null : paramValue;
+
+        if (processedValue !== null) {
+          if (type === "number") {
+            processedValue = parseInt(processedValue, 10);
+          } else if (type === "boolean") {
+            processedValue = processedValue === "true";
+          }
+        }
+
+        if (updatedFilters[key] !== processedValue) {
+          updatedFilters[key] = processedValue;
+          hasChanges = true;
+        }
+      }
+    });
+
+    if (hasChanges) {
+      if (setGlobalFilters) {
+        setGlobalFilters(updatedFilters);
+      } else {
+        setLocalFilters(updatedFilters);
+      }
+    }
+  }, [searchParams, setGlobalFilters]);
 
   const setTab = (newTab) => {
     setSearchParams({ tab: newTab });
@@ -137,9 +230,7 @@ function Policies() {
       <div className="w-full bg-white border-b border-slate-100 px-8 pt-8 pb-0 ">
         <div className="max-w-6xl mx-auto w-full overflow-hidden">
           <div className="flex items-center gap-3 mb-6">
-            <h1 className="text-2xl font-bold text-slate-900 m-0">
-              Healthcare Policies
-            </h1>
+            <h1 className="text-2xl font-bold text-slate-900 m-0">Policies</h1>
           </div>
 
           <div className="flex gap-10">
@@ -186,62 +277,62 @@ function Policies() {
       {/* Scrollable Listing Content */}
       <div className="flex-1 overflow-y-auto w-full flex flex-col items-center pt-8 pb-10">
         <div className="flex flex-col items-center gap-4 w-full max-w-6xl">
-        {isLoading && tab === "all" ? (
-          <div className="flex flex-col items-center gap-6 mt-24">
-            <BouncingLoader size="h-3 w-3" spacing="space-x-2" />
-            <p className="text-slate-500 font-medium animate-pulse">
-              Analyzing available insurance plans...
-            </p>
-          </div>
-        ) : error && tab === "all" ? (
-          <div className="flex flex-col items-center gap-4 mt-24 text-center">
-            <div className="bg-red-50 p-4 rounded-2xl">
-              <p className="text-red-600 font-bold">Error loading policies</p>
+          {isLoading && tab === "all" ? (
+            <div className="flex flex-col items-center gap-6 mt-24">
+              <BouncingLoader size="h-3 w-3" spacing="space-x-2" />
+              <p className="text-slate-500 font-medium animate-pulse">
+                Analyzing available insurance plans...
+              </p>
             </div>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-2 px-6 py-2 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors"
-            >
-              Retry
-            </button>
-          </div>
-        ) : policies.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full px-4 md:px-8">
-            {policies.map((policy, idx) => (
-              <PolicyCard
-                key={policy.id}
-                policy={policy}
-                index={idx}
-                isMyPolicyChat={tab === "mine"}
-                onClick={() => navigate(`/policy-details/${policy.id}`)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-4 mt-24 text-center">
-            <div className="bg-slate-100 p-6 rounded-full mb-2">
-              <SearchX size={48} className="text-slate-400" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-900">
-              {tab === "mine"
-                ? "No personal policies found"
-                : "No matching policies found"}
-            </h3>
-            <p className="text-slate-500 max-w-md">
-              {tab === "mine"
-                ? "You don't have any active policies linked to your account yet."
-                : "We couldn't find any insurance plans matching your current filters. Try adjusting your preferences or resetting the filters."}
-            </p>
-            {tab === "all" && (
+          ) : error && tab === "all" ? (
+            <div className="flex flex-col items-center gap-4 mt-24 text-center">
+              <div className="bg-red-50 p-4 rounded-2xl">
+                <p className="text-red-600 font-bold">Error loading policies</p>
+              </div>
               <button
-                onClick={resetFilters}
-                className="mt-2 px-6 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors"
+                onClick={() => window.location.reload()}
+                className="mt-2 px-6 py-2 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors"
               >
-                Reset All Filters
+                Retry
               </button>
-            )}
-          </div>
-        )}
+            </div>
+          ) : policies.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full px-4 md:px-8">
+              {policies.map((policy, idx) => (
+                <PolicyCard
+                  key={policy.id}
+                  policy={policy}
+                  index={idx}
+                  isMyPolicyChat={tab === "mine"}
+                  onClick={() => navigate(`/policy-details/${policy.id}`)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-4 mt-24 text-center">
+              <div className="bg-slate-100 p-6 rounded-full mb-2">
+                <SearchX size={48} className="text-slate-400" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900">
+                {tab === "mine"
+                  ? "No personal policies found"
+                  : "No matching policies found"}
+              </h3>
+              <p className="text-slate-500 max-w-md">
+                {tab === "mine"
+                  ? "You don't have any active policies linked to your account yet."
+                  : "We couldn't find any insurance plans matching your current filters. Try adjusting your preferences or resetting the filters."}
+              </p>
+              {tab === "all" && (
+                <button
+                  onClick={resetFilters}
+                  className="mt-2 px-6 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors"
+                >
+                  Reset All Filters
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

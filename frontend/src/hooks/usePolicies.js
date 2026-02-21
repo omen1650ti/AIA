@@ -10,17 +10,17 @@ export const useGetPolicies = (filters = {}) => {
   const query = useQuery({
     queryKey: ["policies", filters],
     queryFn: () => getPolicies(filters),
-    enabled: storedPolicies.length === 0, // Only fetch if atom is empty
+    // Removed enabled: storedPolicies.length === 0 to allow filtering re-fetches
   });
 
   useEffect(() => {
-    if (query.data && storedPolicies.length === 0) {
+    if (query.data) {
       setStoredPolicies(query.data);
     }
-  }, [query.data, storedPolicies, setStoredPolicies]);
+  }, [query.data, setStoredPolicies]);
 
   return {
     ...query,
-    data: storedPolicies.length > 0 ? storedPolicies : query.data,
+    data: query.data || storedPolicies, // Prefer query.data for the most current filtered results
   };
 };

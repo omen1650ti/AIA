@@ -10,9 +10,9 @@ import { useGetPolicies } from "../../hooks/usePolicies";
 import BouncingLoader from "../../components/BouncingLoader";
 
 function InsurancePage() {
-  const { policies, filters, updateFilter, setFilters } = useOutletContext();
-  const { data: policiesData, isLoading } = useGetPolicies();
-  const navigate = useNavigate()
+  const { filters, updateFilter, setFilters } = useOutletContext();
+  const { data: policiesData, isLoading } = useGetPolicies(filters);
+  const navigate = useNavigate();
   return (
     <div
       style={{
