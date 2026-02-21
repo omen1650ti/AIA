@@ -11,6 +11,20 @@ from app.schemas.insurance import Plan as PlanSchema, PlanCreate, PlanUpdate, Ri
 
 router = APIRouter()
 
+@router.post("/", response_model=PlanSchema)
+async def create_plan(
+    plan: PlanCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    db_plan = Plan(**plan.model_dump())
+    db.add(db_plan)
+    await db.commit()
+    
+    # Re-query with eager loading to avoid MissingGreenlet error during serialization
+    query = select(Plan).options(selectinload(Plan.riders)).where(Plan.id == db_plan.id)
+    result = await db.execute(query)
+    return result.scalars().first()
+
 @router.get("/", response_model=List[PlanSchema])
 async def get_all_plans(
     skip: int = 0,

@@ -6,8 +6,8 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://aiauser:aiapassword@localhost:5432/aiadatabase"
 
     # Azure Document Intelligence
-    AZURE_FORM_RECOGNIZER_ENDPOINT: str = ""
-    AZURE_FORM_RECOGNIZER_KEY: str = ""
+    AZURE_FORM_RECOGNIZER_ENDPOINT: str
+    AZURE_FORM_RECOGNIZER_KEY: str
 
     # Azure OpenAI
     ENDPOINT: str = ""
