@@ -99,7 +99,7 @@ function DisputePage() {
                       </div>
                       <div className="text-center px-4">
                         <p className={`font-bold text-sm truncate max-w-[200px] ${claimFile ? "text-indigo-600" : "text-slate-800"}`}>
-                          {claimFile ? claimFile.name : "Upload Original Claim"}
+                          {claimFile ? claimFile.name : "Upload Document Plan"}
                         </p>
                         {!claimFile && <p className="text-slate-400 text-xs mt-1">PDF or Image</p>}
                       </div>
@@ -122,7 +122,7 @@ function DisputePage() {
                       </div>
                       <div className="text-center px-4">
                         <p className={`font-bold text-sm truncate max-w-[200px] ${rejectionFile ? "text-indigo-600" : "text-slate-800"}`}>
-                          {rejectionFile ? rejectionFile.name : "Upload Rejection Proof"}
+                          {rejectionFile ? rejectionFile.name : "Upload ID"}
                         </p>
                         {!rejectionFile && <p className="text-slate-400 text-xs mt-1">PDF or Image</p>}
                       </div>
