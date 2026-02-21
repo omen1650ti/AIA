@@ -32,6 +32,7 @@ class ChatRequest(BaseModel):
     user_profile: Optional[Dict[str, Any]] = Field(None, description="Optional user profile data submitted via form/popup")
     is_dispute: Optional[bool] = Field(False, description="Indicates if the message is related to a dispute/complaint")
     is_my_policies_chat: Optional[bool] = Field(False, description="Indicates if the message is related to my policies chat for better agent context")
+    is_guidance: Optional[bool] = Field(False, description="Indicates if the message should be handled by the guidance agent")
 
 
 class MessageDetail(BaseModel):
@@ -59,7 +60,7 @@ class ChatResponse(BaseModel):
         assistant_response: The agent's response text
     """
     thread_id: str = Field(..., description="The thread ID (new or existing)")
-    assistant_response: str = Field(..., description="The agent's response")
+    assistant_response: str|Dict[str, Any] = Field(..., description="The agent's response")
     guidance: Optional[bool] = Field(False, description="Indicates if response is guidance for frontend actions (e.g. policy filters)")
 
 
