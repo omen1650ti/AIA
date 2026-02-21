@@ -1,5 +1,11 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { createChatDetail } from "../../services/ChatService";
 import Header from "./components/Header";
@@ -21,6 +27,14 @@ function ChatPage({ filters, setFilters }) {
   const [threadId, setThreadId] = useState(null);
   const [isGuidanceEnabled, setIsGuidanceEnabled] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isMyPolicy = useMemo(() => {
+    const searchParams = new URLSearchParams(location.search);
+    return (
+      location.pathname === "/policies" && searchParams.get("tab") === "mine"
+    );
+  }, [location]);
 
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
@@ -48,25 +62,22 @@ function ChatPage({ filters, setFilters }) {
       ]);
       setIsTyping(true);
 
-      const searchParams = new URLSearchParams(window.location.search);
-      const isMyPolicyChat =
-        window.location.pathname === "/policies" &&
-        searchParams.get("tab") === "mine";
-      const isMyPolicy =
-        window.location.pathname === "/policies" &&
-        searchParams.get("tab") === "mine";
-
       try {
-        const data = await createChatDetail({
+        const payload = {
           message: text,
-          is_my_policies_chat: isMyPolicy,
           user_profile: profileOverride || userProfile,
           thread_id: threadId,
           is_guidance:
             isGuidanceOverride !== undefined
               ? isGuidanceOverride
               : isGuidanceEnabled,
-        });
+        };
+
+        if (isMyPolicy) {
+          payload.is_my_policies_chat = true;
+        }
+
+        const data = await createChatDetail(payload);
 
         if (isGuidanceEnabled) setIsGuidanceEnabled(false);
 
@@ -135,7 +146,15 @@ function ChatPage({ filters, setFilters }) {
         setTimeout(() => inputRef.current?.focus(), 100);
       }
     },
-    [input, isTyping, filters, setFilters, userProfile, threadId],
+    [
+      input,
+      isTyping,
+      userProfile,
+      threadId,
+      isGuidanceEnabled,
+      navigate,
+      isMyPolicy,
+    ],
   );
 
   const handleQuickStart = (label) => {
