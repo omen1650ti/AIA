@@ -1,15 +1,17 @@
 import React from "react";
 import { SearchIcon, BellIcon } from "../pages/InsurancePage/components/Icons";
 import { S } from "../pages/InsurancePage/styles/theme";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 function NavBar() {
+  const location = useLocation();
   const navLinks = [
-  { label: "Home", path: "/" },
-  { label: "Policies", path: "/policies" },
-  { label: "Review Claim", path: "/claim-reviewer" },
-  { label: "Analyze Dispute", path: "/dispute" },
-];
+    { label: "Home", path: "/" },
+    { label: "Policies", path: "/policies" },
+    { label: "Review Claim", path: "/claim-reviewer" },
+    { label: "Analyze Dispute", path: "/dispute" },
+  ];
+
   return (
     <header
       style={{
@@ -36,29 +38,49 @@ function NavBar() {
             fontSize: 20,
             color: S.text,
             letterSpacing: "-0.02em",
+            textDecoration: "none",
           }}
-          to={"/insurance-page"}
+          to={"/"}
         >
           InsureAI
         </Link>
       </div>
 
       {/* Nav links */}
-     <nav style={{ display: "flex", alignItems: "center", gap: 28 }}>
-  {navLinks.map((link) => (
-    <Link
-      key={link.path}
-      to={link.path}
-      style={{
-        fontSize: 14,
-        color: S.textSub,
-        textDecoration: "none",
-      }}
-    >
-      {link.label}
-    </Link>
-  ))}
-</nav>
+      <nav style={{ display: "flex", alignItems: "center", gap: 28 }}>
+        {navLinks.map((link) => {
+          const isActive = location.pathname === link.path;
+          return (
+            <Link
+              key={link.path}
+              to={link.path}
+              style={{
+                fontSize: 14,
+                color: isActive ? S.purple : S.textSub,
+                fontWeight: isActive ? 700 : 500,
+                textDecoration: "none",
+                transition: "all 0.2s ease",
+                position: "relative",
+              }}
+            >
+              {link.label}
+              {isActive && (
+                <div 
+                  style={{
+                    position: "absolute",
+                    bottom: -20,
+                    left: 0,
+                    right: 0,
+                    height: 3,
+                    background: S.purple,
+                    borderRadius: "3px 3px 0 0"
+                  }}
+                />
+              )}
+            </Link>
+          );
+        })}
+      </nav>
 
       {/* Bell + Avatar */}
       <div
