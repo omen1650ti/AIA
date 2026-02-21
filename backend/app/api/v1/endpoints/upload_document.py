@@ -830,12 +830,15 @@ def chunk_text(
             break_pos = text.rfind(" ", start, end)
 
         if break_pos == -1 or break_pos < start + 200:
-            # No good break → hard cut
-            chunks.append(text[start:end])
-            start = end - chunk_overlap
+            # No good break → hard cut, move forward by chunk_size
+            chunks.append(text[start:end].strip())
+            start = end
         else:
             chunks.append(text[start:break_pos].strip())
-            start = break_pos - chunk_overlap
+            # Move forward to break_pos + 1, applying overlap from the end position
+            start = break_pos + 1
+
+        print(f"Created chunk. Next start position: {start}")
 
     return [c.strip() for c in chunks if c.strip()]
 
@@ -869,10 +872,12 @@ async def store_insurance_data_to_pinecone(
     """
     Upsert insurance document chunks to Pinecone using Azure OpenAI embeddings
     """
+    print("Starting document processing and upsert to Pinecone..."  )
     full_document_text = DOCUMENT_TEXT
     namespace = settings.PINECONE_NAMESPACE
     batch_size = 100
 
+    print(f"creating embedding client and pinecone index client..."  )
     # 1. Embedding client
     embedding_client = AzureOpenAI(
         api_key=settings.EMBEDDING_KEY,
@@ -884,6 +889,7 @@ async def store_insurance_data_to_pinecone(
     pc = Pinecone(api_key=settings.PINECONE_API_KEY)
     index = pc.Index(name=settings.PINECONE_INDEX_NAME)
 
+    print(f"Clients created. Processing document and creating chunks..."  )
     # 3. Chunking (your existing function – looks good)
     chunks = chunk_text(full_document_text)
 
@@ -911,6 +917,8 @@ async def store_insurance_data_to_pinecone(
             source="internal_db_export",
         )
 
+        print(f"Prepared vector {vector_id} with metadata: {metadata}")
+
         vectors_to_upsert.append({
             "id": vector_id,
             "values": embedding,
@@ -919,6 +927,8 @@ async def store_insurance_data_to_pinecone(
                 "text": chunk  # important for retrieval
             }
         })
+
+        print(f"Added vector {vector_id} to batch (current batch size: {len(vectors_to_upsert)})")
 
         if len(vectors_to_upsert) >= batch_size:
             index.upsert(
@@ -929,6 +939,7 @@ async def store_insurance_data_to_pinecone(
             print(f"Upserted batch of {len(vectors_to_upsert)} vectors")
             vectors_to_upsert = []
 
+    print(f"Finished processing all chunks. Total vectors prepared: {upserted_count + len(vectors_to_upsert)}")
     # Final batch
     if vectors_to_upsert:
         index.upsert(

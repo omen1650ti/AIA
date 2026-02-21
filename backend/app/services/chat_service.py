@@ -69,7 +69,7 @@ class ChatService:
 
             return ChatResponse(
                 thread_id="policy_check_thread",
-                assistant_response=policy_details,
+                assistant_response=response.get("assistant_response", ""),
             )
         except Exception as e:
             logger.error(f"Error checking policies: {str(e)}", exc_info=True)
