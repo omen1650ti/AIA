@@ -1,0 +1,394 @@
+[
+
+  {
+
+    "provider": "Star Health",
+
+    "plan_name": "Young Star / Comprehensive",
+
+    "room_rent_type": "Single Private Room",
+
+    "existing_waiting_period_yrs": 1,
+
+    "ncb_percent_per_year": 25,
+
+    "max_ncb_limit": 100,
+
+    "max_child_age": 25,
+
+    "claim_settlement_ratio_percent": 99.06,
+
+    "cashless_hospitals": 14000,
+
+    "features": {
+
+      "free_checkup": true,
+
+      "free_checkup_frequency": "Once per year",
+
+      "maternity_cover": true,
+
+      "ayush": true,
+
+      "air_evacuation": false,
+
+      "home_hospitalization": true,
+
+      "e_consultation": true,
+
+      "e_consultation_note": "Unlimited teleconsultations via Star Health app",
+
+      "external_copay_percent": 20,
+
+      "external_copay_note": "20% co-pay at non-network hospitals",
+
+      "baby_addition_to_policy": true,
+
+      "baby_addition_note": "Existing child can be added within 90 days of policy purchase",
+
+      "newborn_baby_cover": true,
+
+      "newborn_cover_from_day": 1,
+
+      "newborn_cover_note": "Newborn covered from Day 1 up to sum insured; requires policy renewal add-on",
+
+      "daily_cash_allowance": true,
+
+      "daily_cash_amount_inr": 500,
+
+      "daily_cash_max_days": 30,
+
+      "daily_cash_note": "Hospital cash benefit of ₹500/day for shared room upgrade",
+
+      "animal_bite_vaccination": true,
+
+      "animal_bite_note": "Anti-rabies vaccination covered post animal bite"
+
+    },
+
+    "tiers": [
+
+      { "sum_insured": 500000,  "base_premium_age_30": 6500  },
+
+      { "sum_insured": 1000000, "base_premium_age_30": 11000 },
+
+      { "sum_insured": 2000000, "base_premium_age_30": 19000 }
+
+    ]
+
+  },
+
+  {
+
+    "provider": "Niva Bupa",
+
+    "plan_name": "ReAssure 2.0",
+
+    "room_rent_type": "No Limit",
+
+    "existing_waiting_period_yrs": 3,
+
+    "ncb_percent_per_year": 100,
+
+    "max_ncb_limit": 100,
+
+    "max_child_age": 30,
+
+    "claim_settlement_ratio_percent": 91.29,
+
+    "cashless_hospitals": 10000,
+
+    "features": {
+
+      "free_checkup": true,
+
+      "free_checkup_frequency": "Once per year",
+
+      "maternity_cover": false,
+
+      "ayush": true,
+
+      "air_evacuation": true,
+
+      "home_hospitalization": true,
+
+      "e_consultation": true,
+
+      "e_consultation_note": "Up to 10 free e-consultations per year via Niva Bupa app",
+
+      "external_copay_percent": 0,
+
+      "external_copay_note": "No co-pay; full coverage at non-network hospitals subject to actuals",
+
+      "baby_addition_to_policy": true,
+
+      "baby_addition_note": "Child can be added at policy renewal or within 60 days of birth",
+
+      "newborn_baby_cover": true,
+
+      "newborn_cover_from_day": 1,
+
+      "newborn_cover_note": "Newborn covered from Day 1 under family floater; vaccination costs included",
+
+      "daily_cash_allowance": true,
+
+      "daily_cash_amount_inr": 1000,
+
+      "daily_cash_max_days": 30,
+
+      "daily_cash_note": "₹1000/day hospital cash benefit for each continuous hospitalization",
+
+      "animal_bite_vaccination": true,
+
+      "animal_bite_note": "Anti-rabies and anti-snake venom covered; OPD basis"
+
+    },
+
+    "tiers": [
+
+      { "sum_insured": 500000,  "base_premium_age_30": 7200  },
+
+      { "sum_insured": 1000000, "base_premium_age_30": 12500 },
+
+      { "sum_insured": 2000000, "base_premium_age_30": 21000 }
+
+    ]
+
+  },
+
+  {
+
+    "provider": "HDFC ERGO",
+
+    "plan_name": "Optima Secure",
+
+    "room_rent_type": "No Limit",
+
+    "existing_waiting_period_yrs": 2,
+
+    "ncb_percent_per_year": 50,
+
+    "max_ncb_limit": 100,
+
+    "max_child_age": 25,
+
+    "claim_settlement_ratio_percent": 98.00,
+
+    "cashless_hospitals": 12000,
+
+    "features": {
+
+      "free_checkup": true,
+
+      "free_checkup_frequency": "Once every 2 years; annual after 4 claim-free years",
+
+      "maternity_cover": true,
+
+      "ayush": true,
+
+      "air_evacuation": true,
+
+      "home_hospitalization": true,
+
+      "e_consultation": true,
+
+      "e_consultation_note": "Unlimited teleconsultations via HDFC ERGO Health app",
+
+      "external_copay_percent": 10,
+
+      "external_copay_note": "10% co-pay at non-empanelled hospitals; waived for emergencies",
+
+      "baby_addition_to_policy": true,
+
+      "baby_addition_note": "Child can be added mid-term within 90 days of birth",
+
+      "newborn_baby_cover": true,
+
+      "newborn_cover_from_day": 91,
+
+      "newborn_cover_note": "Newborn covered from Day 91; maternity and newborn linked benefit available",
+
+      "daily_cash_allowance": true,
+
+      "daily_cash_amount_inr": 800,
+
+      "daily_cash_max_days": 20,
+
+      "daily_cash_note": "₹800/day hospital cash for ICU or general ward stay beyond 48 hours",
+
+      "animal_bite_vaccination": true,
+
+      "animal_bite_note": "Covers anti-rabies vaccination post animal bite under OPD benefit"
+
+    },
+
+    "tiers": [
+
+      { "sum_insured": 500000,  "base_premium_age_30": 8500  },
+
+      { "sum_insured": 1000000, "base_premium_age_30": 14000 },
+
+      { "sum_insured": 2000000, "base_premium_age_30": 24000 }
+
+    ]
+
+  },
+
+  {
+
+    "provider": "ICICI Lombard",
+
+    "plan_name": "Health AdvantEdge",
+
+    "room_rent_type": "Single Private Room",
+
+    "existing_waiting_period_yrs": 2,
+
+    "ncb_percent_per_year": 20,
+
+    "max_ncb_limit": 50,
+
+    "max_child_age": 25,
+
+    "claim_settlement_ratio_percent": 85.12,
+
+    "cashless_hospitals": 6500,
+
+    "features": {
+
+      "free_checkup": true,
+
+      "free_checkup_frequency": "Once per year after 2 consecutive claim-free years",
+
+      "maternity_cover": false,
+
+      "ayush": false,
+
+      "air_evacuation": false,
+
+      "home_hospitalization": false,
+
+      "e_consultation": true,
+
+      "e_consultation_note": "Up to 5 free e-consultations per year via IL TakeCare app",
+
+      "external_copay_percent": 25,
+
+      "external_copay_note": "25% co-pay at non-network hospitals; cashless not available outside network",
+
+      "baby_addition_to_policy": true,
+
+      "baby_addition_note": "Child addition allowed only at renewal; not mid-term",
+
+      "newborn_baby_cover": false,
+
+      "newborn_cover_from_day": null,
+
+      "newborn_cover_note": "Newborn cover not included; must be added as a separate policy at renewal",
+
+      "daily_cash_allowance": false,
+
+      "daily_cash_amount_inr": null,
+
+      "daily_cash_max_days": null,
+
+      "daily_cash_note": "Daily cash allowance not available under this plan",
+
+      "animal_bite_vaccination": false,
+
+      "animal_bite_note": "Animal bite vaccination not covered; must be claimed under OPD if separately opted"
+
+    },
+
+    "tiers": [
+
+      { "sum_insured": 500000,  "base_premium_age_30": 6000  },
+
+      { "sum_insured": 1000000, "base_premium_age_30": 10500 },
+
+      { "sum_insured": 2000000, "base_premium_age_30": 18500 }
+
+    ]
+
+  },
+
+  {
+
+    "provider": "Care Health (General)",
+
+    "plan_name": "Care Supreme",
+
+    "room_rent_type": "Shared Room",
+
+    "existing_waiting_period_yrs": 4,
+
+    "ncb_percent_per_year": 50,
+
+    "max_ncb_limit": 100,
+
+    "max_child_age": 24,
+
+    "claim_settlement_ratio_percent": 90.32,
+
+    "cashless_hospitals": 8000,
+
+    "features": {
+
+      "free_checkup": true,
+
+      "free_checkup_frequency": "Once per year",
+
+      "maternity_cover": false,
+
+      "ayush": true,
+
+      "air_evacuation": true,
+
+      "home_hospitalization": true,
+
+      "e_consultation": false,
+
+      "e_consultation_note": "E-consultation not included; available as a paid add-on rider",
+
+      "external_copay_percent": 30,
+
+      "external_copay_note": "30% co-pay mandatory at non-empanelled hospitals",
+
+      "baby_addition_to_policy": true,
+
+      "baby_addition_note": "Child addition allowed at renewal; mid-term addition on request with documentation",
+
+      "newborn_baby_cover": true,
+
+      "newborn_cover_from_day": 1,
+
+      "newborn_cover_note": "Newborn covered from Day 1 under floater sum insured; vaccination excluded",
+
+      "daily_cash_allowance": true,
+
+      "daily_cash_amount_inr": 500,
+
+      "daily_cash_max_days": 15,
+
+      "daily_cash_note": "₹500/day hospital cash for continuous hospitalization beyond 48 hours; max 15 days",
+
+      "animal_bite_vaccination": true,
+
+      "animal_bite_note": "Anti-rabies vaccination post animal bite covered under in-patient or day-care"
+
+    },
+
+    "tiers": [
+
+      { "sum_insured": 500000,  "base_premium_age_30": 5500  },
+
+      { "sum_insured": 1000000, "base_premium_age_30": 9800  },
+
+      { "sum_insured": 2000000, "base_premium_age_30": 17000 }
+
+    ]
+
+  }
+
+]
+ 
