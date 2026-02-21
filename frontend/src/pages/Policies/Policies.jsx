@@ -36,7 +36,7 @@ const MY_POLICIES = [
     highlightIcon: <Zap size={14} className="text-amber-500" />,
     color: "#0ea5e9", // Sky blue for HDFC
     icon: <ShieldCheck size={24} />,
-    isMyPolicy: true,
+    isMyPolicyChat: true,
   },
   {
     id: "62963426202600",
@@ -62,7 +62,7 @@ const MY_POLICIES = [
     highlightIcon: <Clock size={14} className="text-violet-500" />,
     color: "#8b5cf6", // Violet for Niva Bupa
     icon: <Activity size={24} />,
-    isMyPolicy: true,
+    isMyPolicyChat: true,
   },
 ];
 
@@ -212,7 +212,7 @@ function Policies() {
                 key={policy.id}
                 policy={policy}
                 index={idx}
-                isMyPolicy={tab === "mine"}
+                isMyPolicyChat={tab === "mine"}
                 onClick={() => navigate(`/policy-details/${policy.id}`)}
               />
             ))}

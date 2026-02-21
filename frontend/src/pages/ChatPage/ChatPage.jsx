@@ -38,12 +38,12 @@ function ChatPage({ filters, setFilters }) {
       setIsTyping(true);
 
       const searchParams = new URLSearchParams(window.location.search);
-      const isMyPolicy = window.location.pathname === "/policies" && searchParams.get("tab") === "mine";
+      const isMyPolicyChat = window.location.pathname === "/policies" && searchParams.get("tab") === "mine";
 
       try {
         const res  = await axios.post("/api/chat", { 
           message: text,
-          isMyPolicy: isMyPolicy
+          isMyPolicyChat: isMyPolicyChat
         });
         const data = res.data;
 

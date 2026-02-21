@@ -5,94 +5,133 @@ import BouncingLoader from "../../components/BouncingLoader";
 import { Upload, Mail, Copy, ExternalLink, CheckCircle2, AlertCircle } from "lucide-react";
 
 function DisputePage() {
+  const [claimFile, setClaimFile] = useState(null);
+  const [rejectionFile, setRejectionFile] = useState(null);
   const [description, setDescription] = useState("");
-  const [file, setFile] = useState(null);
   const [isCopied, setIsCopied] = useState(false);
   const { loading, error, result, analyzeDispute, resetDispute } = useDispute();
 
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-    }
+  const handleClaimFile = (e) => {
+    if (e.target.files && e.target.files[0]) setClaimFile(e.target.files[0]);
+  };
+
+  const handleRejectionFile = (e) => {
+    if (e.target.files && e.target.files[0]) setRejectionFile(e.target.files[0]);
   };
 
   const handleSubmit = () => {
-    if (!description || !file) return;
-    analyzeDispute({ description, file });
+    if (!claimFile || !rejectionFile) return;
+    analyzeDispute({ claimFile, rejectionFile, description });
   };
 
   const handleCopy = () => {
-    if (result?.generatedEmail) {
-      navigator.clipboard.writeText(result.generatedEmail);
+    if (result?.dispute_mail) {
+      navigator.clipboard.writeText(result.dispute_mail);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     }
   };
 
   const handleOpenGmail = () => {
-    if (result?.generatedEmail) {
-      const subject = result.generatedEmail.split("\n")[0].replace("Subject: ", "");
-      const body = result.generatedEmail.split("\n").slice(2).join("\n");
+    if (result?.dispute_mail) {
+      const subjectLine = result.dispute_mail.split("\n").find(l => l.startsWith("Subject:"));
+      const subject = subjectLine ? subjectLine.replace("Subject: ", "") : "Dispute Regarding Insurance Claim";
+      const body = result.dispute_mail.split("\n").slice(2).join("\n");
       window.open(`https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, "_blank");
     }
   };
+
+  const DataSection = ({ title, data }) => (
+    <div className="mb-6">
+      <h5 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">{title}</h5>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-100">
+        {Object.entries(data).map(([key, val]) => (
+          <div key={key} className="flex flex-col">
+            <span className="text-[11px] text-slate-500 font-semibold">{key}</span>
+            <span className="text-sm text-slate-800 font-bold break-all">{String(val)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex flex-col h-full bg-[#fafbfc] w-full overflow-hidden">
       {/* Header */}
       <div className="w-full bg-white border-b border-slate-100 px-8 py-8 shrink-0">
-        <div className="max-w-4xl mx-auto w-full">
+        <div className="max-w-5xl mx-auto w-full">
           <h1 className="text-3xl font-extrabold text-slate-900 m-0">Dispute Analysis</h1>
           <p className="text-slate-500 mt-2 text-lg">
-            Upload your claim rejection document and describe the issue to generate a formal dispute email.
+            Upload your claim and rejection documents to generate a formal dispute email with AI analysis.
           </p>
         </div>
       </div>
 
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto w-full flex flex-col items-center pt-8 pb-12">
-        <div className="w-full max-w-4xl px-4 flex flex-col gap-8">
+        <div className="w-full max-w-5xl px-4 flex flex-col gap-8">
           
           {!result ? (
             <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-8">
                 
-                {/* Document Upload */}
-                <div className="flex flex-col gap-3">
-                  <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">
-                    Upload Rejection Document
-                  </label>
-                  <label 
-                    className={`relative flex flex-col items-center justify-center p-10 border-2 border-dashed rounded-2xl cursor-pointer transition-all ${
-                      file ? "border-indigo-500 bg-indigo-50/30" : "border-slate-200 hover:border-indigo-400 bg-slate-50/50"
-                    }`}
-                  >
-                    <input type="file" className="hidden" onChange={handleFileChange} />
-                    <div className={`p-4 rounded-full mb-3 ${file ? "bg-indigo-100" : "bg-white"}`}>
-                      <Upload className={file ? "text-indigo-600" : "text-slate-400"} size={28} />
-                    </div>
-                    {file ? (
-                      <div className="text-center">
-                        <p className="text-indigo-600 font-bold mb-1">{file.name}</p>
-                        <p className="text-slate-500 text-xs">File selected successfully</p>
+                {/* Dual Document Upload */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Claim Document */}
+                  <div className="flex flex-col gap-3">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                      1. Document Plan
+                    </label>
+                    <label 
+                      className={`relative flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-2xl cursor-pointer transition-all h-48 ${
+                        claimFile ? "border-indigo-500 bg-indigo-50/30" : "border-slate-200 hover:border-indigo-400 bg-slate-50/50"
+                      }`}
+                    >
+                      <input type="file" className="hidden" onChange={handleClaimFile} />
+                      <div className={`p-3 rounded-full mb-3 ${claimFile ? "bg-indigo-100" : "bg-white"}`}>
+                        <Upload className={claimFile ? "text-indigo-600" : "text-slate-400"} size={24} />
                       </div>
-                    ) : (
-                      <div className="text-center">
-                        <p className="text-slate-800 font-bold mb-1">Click to upload or drag & drop</p>
-                        <p className="text-slate-400 text-sm">PDF, JPG or PNG (max. 10MB)</p>
+                      <div className="text-center px-4">
+                        <p className={`font-bold text-sm truncate max-w-[200px] ${claimFile ? "text-indigo-600" : "text-slate-800"}`}>
+                          {claimFile ? claimFile.name : "Upload Original Claim"}
+                        </p>
+                        {!claimFile && <p className="text-slate-400 text-xs mt-1">PDF or Image</p>}
                       </div>
-                    )}
-                  </label>
+                    </label>
+                  </div>
+
+                  {/* Rejection Document */}
+                  <div className="flex flex-col gap-3">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                      2. Hospital Bill
+                    </label>
+                    <label 
+                      className={`relative flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-2xl cursor-pointer transition-all h-48 ${
+                        rejectionFile ? "border-indigo-500 bg-indigo-50/30" : "border-slate-200 hover:border-indigo-400 bg-slate-50/50"
+                      }`}
+                    >
+                      <input type="file" className="hidden" onChange={handleRejectionFile} />
+                      <div className={`p-3 rounded-full mb-3 ${rejectionFile ? "bg-indigo-100" : "bg-white"}`}>
+                        <Upload className={rejectionFile ? "text-indigo-600" : "text-slate-400"} size={24} />
+                      </div>
+                      <div className="text-center px-4">
+                        <p className={`font-bold text-sm truncate max-w-[200px] ${rejectionFile ? "text-indigo-600" : "text-slate-800"}`}>
+                          {rejectionFile ? rejectionFile.name : "Upload Rejection Proof"}
+                        </p>
+                        {!rejectionFile && <p className="text-slate-400 text-xs mt-1">PDF or Image</p>}
+                      </div>
+                    </label>
+                  </div>
                 </div>
 
-                {/* Description */}
+                {/* Optional Description */}
                 <div className="flex flex-col gap-3">
-                  <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">
-                    Issue Description
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                    Context 
                   </label>
                   <textarea
-                    className="w-full h-40 p-4 border border-slate-200 rounded-2xl text-slate-800 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 outline-none transition-all resize-none font-sans"
-                    placeholder="Briefly describe why you are disputing the decision (e.g., 'The medical necessity was clearly documented by my physician but ignored during review.')..."
+                    className="w-full h-24 p-4 border border-slate-200 rounded-2xl text-slate-800 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 outline-none transition-all resize-none font-sans text-sm"
+                    placeholder="Briefly describe why you are disputing the decision..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                   />
@@ -101,9 +140,9 @@ function DisputePage() {
                 {/* Action Button */}
                 <button
                   onClick={handleSubmit}
-                  disabled={!description || !file || loading}
+                  disabled={!claimFile || !rejectionFile || loading}
                   className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all active:scale-[0.98] ${
-                    !description || !file || loading
+                    !claimFile || !rejectionFile || loading
                       ? "bg-slate-100 text-slate-400 cursor-not-allowed"
                       : "bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200"
                   }`}
@@ -111,77 +150,76 @@ function DisputePage() {
                   {loading ? (
                     <>
                       <BouncingLoader size="h-2 w-2" spacing="space-x-1" inverted />
-                      <span>Analyzing Dispute...</span>
+                      <span>Running Analysis...</span>
                     </>
                   ) : (
-                    "Analyze Dispute"
+                    "Analyze & Generate Dispute"
                   )}
                 </button>
 
                 {error && (
-                  <div className="flex items-center gap-3 p-4 bg-red-50 rounded-xl border border-red-100 text-red-600">
-                    <AlertCircle size={20} />
-                    <span className="font-medium">{error}</span>
+                  <div className="flex items-center gap-3 p-4 bg-red-50 rounded-xl border border-red-100 text-red-600 text-sm">
+                    <AlertCircle size={18} />
+                    <span className="font-bold">{error}</span>
                   </div>
                 )}
               </div>
             </div>
           ) : (
-            <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="p-3 bg-green-100 rounded-full">
-                    <CheckCircle2 className="text-green-600" size={32} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              
+              {/* Left Column: Email Result */}
+              <div className="lg:col-span-4 flex flex-col gap-6">
+                <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm h-full">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="p-3 bg-green-100 rounded-full">
+                      <CheckCircle2 className="text-green-600" size={28} />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-slate-900">Analysis Complete</h2>
+                      <p className="text-slate-500">Professional dispute template generated.</p>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-slate-900">Analysis Complete</h2>
-                    <p className="text-slate-500">We've generated a formal dispute email for you.</p>
+
+                  <div className="bg-slate-900 rounded-3xl p-8 relative group overflow-hidden shadow-2xl">
+                     <div className="absolute top-0 left-0 w-1.5 h-full bg-indigo-500" />
+                     <pre className="text-slate-300 font-sans whitespace-pre-wrap leading-relaxed text-[15px]">
+                       {result.dispute_mail}
+                     </pre>
                   </div>
-                </div>
 
-                <div className="bg-slate-900 rounded-2xl p-6 relative group overflow-hidden">
-                   <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500" />
-                   <pre className="text-slate-300 font-sans whitespace-pre-wrap leading-relaxed text-[15px]">
-                     {result.generatedEmail}
-                   </pre>
-                </div>
+                  <div className="flex items-center gap-4 mt-8">
+                    <button
+                      onClick={handleCopy}
+                      className="flex-1 py-4 px-6 rounded-2xl font-extrabold flex items-center justify-center gap-3 transition-all active:scale-[0.95] border-2 border-slate-100 hover:bg-slate-50 text-slate-700"
+                    >
+                      {isCopied ? <CheckCircle2 size={20} className="text-green-500" /> : <Copy size={20} />}
+                      {isCopied ? "Copied!" : "Copy Text"}
+                    </button>
+                    <button
+                      onClick={handleOpenGmail}
+                      className="flex-1 py-4 px-6 rounded-2xl font-extrabold flex items-center justify-center gap-3 transition-all active:scale-[0.95] bg-indigo-600 text-white hover:bg-indigo-700 shadow-xl shadow-indigo-100"
+                    >
+                      <Mail size={20} />
+                      Send via Gmail
+                    </button>
+                  </div>
 
-                <div className="flex items-center gap-4 mt-8">
                   <button
-                    onClick={handleCopy}
-                    className="flex-1 py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all active:scale-[0.98] border border-slate-200 hover:bg-slate-50 text-slate-700"
+                    onClick={() => {
+                      setClaimFile(null);
+                      setRejectionFile(null);
+                      resetDispute();
+                    }}
+                    className="w-full mt-6 py-3 text-slate-400 font-bold hover:text-slate-600 transition-colors text-sm"
                   >
-                    {isCopied ? <CheckCircle2 size={20} className="text-green-500" /> : <Copy size={20} />}
-                    {isCopied ? "Copied!" : "Copy Email Text"}
-                  </button>
-                  <button
-                    onClick={handleOpenGmail}
-                    className="flex-1 py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all active:scale-[0.98] bg-slate-900 text-white hover:bg-slate-800"
-                  >
-                    <Mail size={20} />
-                    Open in Gmail
+                    Start New Analysis
                   </button>
                 </div>
-
-                <button
-                  onClick={resetDispute}
-                  className="w-full mt-4 py-3 text-slate-400 font-bold hover:text-slate-600 transition-colors"
-                >
-                  Return to analyzer
-                </button>
               </div>
 
-              <div className="bg-indigo-50 rounded-3xl p-6 border border-indigo-100 flex items-start gap-4">
-                <div className="p-2 bg-indigo-100 rounded-lg text-indigo-600 shrink-0">
-                  <AlertCircle size={20} />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-indigo-900 uppercase tracking-wider mb-1">What's Next?</h4>
-                  <p className="text-indigo-800/80 text-[15px]">
-                    Send this email to your insurer's dispute resolution or support department. Don't forget to attach the same rejection document you uploaded here.
-                  </p>
-                </div>
-              </div>
+              {/* Right Column: Extracted Data */}
+            
             </div>
           )}
         </div>

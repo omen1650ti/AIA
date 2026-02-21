@@ -1,29 +1,17 @@
+import { postAPI } from './Axios';
+
 /**
- * Mock Service for Dispute Analysis
+ * Real Service for Dispute Analysis using multi-file upload
  */
 export const submitDispute = async (data) => {
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  const formData = new FormData();
+  
+  // The backend expects files under the key 'files'
+  if (data.claimFile) formData.append('files', data.claimFile);
+  if (data.rejectionFile) formData.append('files', data.rejectionFile);
+  
+  // user_input is required by the API
+  formData.append('user_input', data.description || "Dispute analysis request");
 
-  // Mock response with a generated email
-  return {
-    success: true,
-    message: "Dispute analyzed successfully.",
-    generatedEmail: `Subject: Formal Dispute Regarding Insurance Claim - ${data.description.substring(0, 20)}...
-
-Dear Support Team,
-
-I am writing to formally dispute the recent decision regarding my insurance claim. 
-
-Details provided:
-${data.description}
-
-Attached are the relevant supporting documents for your review. I request a re-evaluation of my case based on the provided information.
-
-Thank you for your prompt attention to this matter.
-
-Sincerely,
-[Your Name]`,
-    status: "Email template ready for submission"
-  };
+  return await postAPI('/v1/dispute/generate-mail', formData);
 };

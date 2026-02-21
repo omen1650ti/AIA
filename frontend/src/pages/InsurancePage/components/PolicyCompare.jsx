@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useComparePolicies } from "../../../hooks/useComparePolicies";
+import BouncingLoader from "../../../components/BouncingLoader";
 
 const PURPLE       = "#7c3aed";
 const PURPLE_LIGHT = "#ede9fe";
@@ -9,47 +11,11 @@ const BG           = "#f8f7ff";
 const TEXT         = "#111827";
 const TEXT_SUB     = "#6b7280";
 const TEXT_MUTED   = "#9ca3af";
-const FONT         = "'DM Sans', 'Segoe UI', system-ui, sans-serif";
 
-const POLICIES = [
-  {
-    id: 1,
-    name: "SafeLife Platinum Plus",
-    analysis: `SafeLife Platinum Plus is one of the most comprehensive health plans available. It offers a $0 annual deductible so coverage kicks in immediately. The $249 monthly premium covers $15 co-pay primary care, 100% in-patient hospital, full dental and vision, and global emergency coverage.\n\nIdeal for families with children under 10 — pediatric wellness visits are $0 co-pay up to age 12. Mental health is fully covered with 30 therapy sessions annually. Specialist visits are $35 after referral.\n\nThe plan includes chiropractic (12 visits/yr), acupuncture (8 visits/yr), 98% national hospital network, and a 3-tier prescription formulary: generics $5, preferred brands $30, non-preferred $60.`,
-  },
-  {
-    id: 2,
-    name: "Nova Shield Flex",
-    analysis: `Nova Shield Flex is a mid-tier plan built for remote workers and frequent domestic travellers. At $185/month it balances affordability with core protection.\n\n$500 deductible, 80/20 co-insurance. Primary care $25 co-pay. Telehealth is completely free — a standout perk for the remote-work demographic. Mental health includes 20 sessions/year virtually or in-person.\n\nBonus: 24/7 nurse line and bundled wellness apps. Network covers 88% of national providers. International coverage is emergency-only so supplemental cover is recommended for extended travel.`,
-  },
-  {
-    id: 3,
-    name: "Guardian Platinum",
-    analysis: `Guardian Platinum excels in network quality and claims speed at just $124/month — the most affordable solid option in this set.\n\n$750 deductible, 80/20 post-deductible co-insurance. Primary care $30, specialists $50 with no referral needed. Average claims processing is 2 hours — fastest in class.\n\nBase plan excludes dental, vision, and alternative therapy, but the Guardian Wellness Rider ($22/month) bundles all three plus 6 chiropractic visits. Top customer satisfaction ratings for 5 consecutive years.`,
-  },
-  {
-    id: 4,
-    name: "Azure Complete Care",
-    analysis: `Azure Complete Care is designed for households wanting maximum coverage with minimum friction. $215/month, $250 deductible, 90/10 co-insurance.\n\nPrimary care $10, specialists $25, unlimited telehealth free. Full dental including orthodontics up to $1,500 lifetime, vision, hearing, and 40 mental health sessions annually.\n\nUnique perks: $300 Azure Health Wallet for gym/nutrition/wellness, global non-emergency coverage at 70% in 45 countries, $0 generic prescriptions, and 3 IUI fertility cycles included.`,
-  },
-  {
-    id: 5,
-    name: "HealthFirst Basic",
-    analysis: `HealthFirst Basic is an entry-level plan for young healthy individuals who want essential coverage at the lowest possible cost. At $89/month it is the most affordable in this set.\n\n$1,500 deductible, 70/30 co-insurance. Primary care $40, specialists $75 with referral. Preventive care — physicals, vaccinations, cancer screenings — covered at 100% with no deductible.\n\nMental health limited to 10 sessions/year. No dental or vision. Generics only for prescriptions. Domestic emergency at 80%; international emergency capped at $5,000. Best for ages 18–30 seeking ACA compliance and catastrophic coverage.`,
-  },
-];
-
-const LOADER_STEPS = [
-  "Reading policy documents…",
-  "Extracting coverage terms…",
-  "Comparing deductibles & co-pays…",
-  "Running AI comparison model…",
-  "Generating final report…",
-];
-function PolicyDropdown({ label, value, onChange, exclude }) {
+function PolicyDropdown({ label, value, onChange, exclude, policies }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
-  const selected = POLICIES.find((p) => p.id === value);
+  const selected = policies.find((p) => p.id === value);
 
   useEffect(() => {
     const handler = (e) => {
@@ -87,7 +53,7 @@ function PolicyDropdown({ label, value, onChange, exclude }) {
           }}
         >
           <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {selected ? `${selected.name} ` : "Select a policy…"}
+            {selected ? (selected.jsonb_data?.plan_name || selected.name || selected.details || "Unnamed Policy") : "Select a policy…"}
           </span>
           <svg
             width="13" height="13" viewBox="0 0 24 24"
@@ -111,6 +77,8 @@ function PolicyDropdown({ label, value, onChange, exclude }) {
             boxShadow: "0 8px 24px rgba(109,40,217,0.13)",
             zIndex: 200,
             overflow: "hidden",
+            maxHeight: "300px",
+            overflowY: "auto",
           }}>
             {/* Clear */}
             <button
@@ -125,7 +93,7 @@ function PolicyDropdown({ label, value, onChange, exclude }) {
             </button>
 
             {/* Policy rows */}
-            {POLICIES.filter((p) => p.id !== exclude).map((p) => (
+            {policies.filter((p) => p.id !== exclude).map((p) => (
               <button
                 key={p.id}
                 onClick={() => { onChange(p.id); setOpen(false); }}
@@ -150,7 +118,7 @@ function PolicyDropdown({ label, value, onChange, exclude }) {
                 }}
               >
                 <div>
-                  <div style={{ marginBottom: 1 }}>{p.name}</div>
+                  <div style={{ marginBottom: 1 }}>{p.jsonb_data?.plan_name || p.name || p.details || "Unnamed Policy"}</div>
                 </div>
                 {value === p.id && (
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5">
@@ -166,71 +134,66 @@ function PolicyDropdown({ label, value, onChange, exclude }) {
   );
 }
 
-// ── Fake Loader ───────────────────────────────────────────────────────────────
-function FakeLoader({ onDone }) {
-  const [step, setStep]     = useState(0);
-  const [pct,  setPct]      = useState(0);
-
-  useEffect(() => {
-    const prog  = setInterval(() => setPct((v) => { if (v >= 100) { clearInterval(prog); return 100; } return v + 2; }), 58);
-    const steps = setInterval(() => setStep((v) => v < LOADER_STEPS.length - 1 ? v + 1 : (clearInterval(steps), v)), 540);
-    const done  = setTimeout(onDone, 3200);
-    return () => { clearInterval(prog); clearInterval(steps); clearTimeout(done); };
-  }, [onDone]);
-
-  return (
-    <div style={{
-      padding: "48px 24px",
-      display: "flex", flexDirection: "column", alignItems: "center", gap: 20,
-      background: "linear-gradient(135deg, #faf8ff 0%, #f3f0ff 100%)",
-      borderRadius: 14, border: `1px solid ${BORDER}`,
-    }}>
-     
-
-      <div style={{ textAlign: "center" }}>
-        <p style={{ fontSize: 13, fontWeight: 700, color: PURPLE, margin: "0 0 4px 0" }}>
-          Running AI Comparison Analysis
-        </p>
-        <p style={{ fontSize: 12, color: TEXT_SUB, margin: 0 }}>
-          {LOADER_STEPS[step]}
-        </p>
-      </div>
-
-      {/* Progress bar */}
-      <div style={{ width: "100%", maxWidth: 300 }}>
-        <div style={{ height: 5, borderRadius: 99, background: PURPLE_LIGHT, overflow: "hidden" }}>
-          <div style={{
-            height: "100%", width: `${Math.min(pct, 100)}%`,
-            background: PURPLE_GRAD, borderRadius: 99,
-            transition: "width 0.08s linear",
-          }} />
-        </div>
-        <p style={{ textAlign: "right", fontSize: 11, color: TEXT_MUTED, margin: "3px 0 0 0" }}>
-          {Math.min(pct, 100)}%
-        </p>
-      </div>
-
-      {/* Step dots */}
-      <div style={{ display: "flex", gap: 5 }}>
-        {LOADER_STEPS.map((_, i) => (
-          <div key={i} style={{
-            height: 5, borderRadius: 99,
-            width: i <= step ? 18 : 5,
-            background: i <= step ? PURPLE : PURPLE_MID,
-            opacity: i <= step ? 1 : 0.35,
-            transition: "all 0.3s ease",
-          }} />
-        ))}
-      </div>
-
-      <style>{`@keyframes pc-spin { to { transform: rotate(360deg); } }`}</style>
-    </div>
-  );
-}
-
 // ── Analysis Result Panel ────────────────────────────────────────────────────
-function AnalysisPanel({ policy, accent }) {
-  const paras = policy.analysis.split("\n\n").filter(Boolean);
+function AnalysisPanel({ label, policy, analysis, accent }) {
+  if (!policy) return null;
+
+  // Simple Markdown Parser for the specific structure returned by the backend
+  const renderContent = (text) => {
+    if (!text) return <p style={{ color: TEXT_MUTED }}>No analysis available.</p>;
+
+    // Split by sections or tables
+    const lines = text.split("\n");
+    
+    return lines.map((line, i) => {
+      // Bold handling
+      const parts = line.split(/(\*\*.*?\*\*)/g);
+      const renderedLine = parts.map((part, j) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <strong key={j}>{part.slice(2, -2)}</strong>;
+        }
+        return part;
+      });
+
+      // Headers
+      if (line.startsWith('## ')) {
+        return <h3 key={i} style={{ fontSize: 16, fontWeight: 800, color: accent, margin: "20px 0 10px 0", borderBottom: `1px solid ${BORDER}`, paddingBottom: 4 }}>{line.replace('## ', '')}</h3>;
+      }
+
+      // Check for table rows (very simple)
+      if (line.includes('|')) {
+        if (line.includes('---')) return null; // Skip separators
+        const cells = line.split('|').filter(c => c.trim() !== "");
+        return (
+          <div key={i} style={{ display: "flex", borderBottom: `1px solid ${BG}`, padding: "6px 0" }}>
+            {cells.map((cell, idx) => (
+              <span key={idx} style={{ flex: 1, fontSize: 12, fontWeight: idx === 0 ? 600 : 400 }}>{cell.trim()}</span>
+            ))}
+          </div>
+        );
+      }
+
+      // List items
+      if (line.trim().startsWith('- ')) {
+        return (
+          <div key={i} style={{ display: "flex", gap: 8, margin: "4px 0", fontSize: 13, color: TEXT_SUB }}>
+            <span style={{ color: accent, fontWeight: 800 }}>•</span>
+            <span>{renderedLine}</span>
+          </div>
+        );
+      }
+
+      // Empty lines
+      if (!line.trim()) return <div key={i} style={{ height: 8 }} />;
+
+      return (
+        <p key={i} style={{ fontSize: 13, lineHeight: 1.6, color: TEXT_SUB, margin: "4px 0" }}>
+          {renderedLine}
+        </p>
+      );
+    });
+  };
+  
   return (
     <div style={{
       flex: 1, minWidth: 0,
@@ -238,6 +201,8 @@ function AnalysisPanel({ policy, accent }) {
       border: `1.5px solid ${BORDER}`,
       borderRadius: 14,
       overflow: "hidden",
+      display: "flex",
+      flexDirection: "column"
     }}>
       {/* Header */}
       <div style={{
@@ -246,26 +211,16 @@ function AnalysisPanel({ policy, accent }) {
         background: "linear-gradient(135deg, #faf8ff 0%, #f5f3ff 100%)",
       }}>
         <p style={{ fontSize: 9, fontWeight: 700, color: TEXT_MUTED, textTransform: "uppercase", letterSpacing: "0.09em", margin: "0 0 3px 0" }}>
-          AI Analysis
+          {label}
         </p>
         <p style={{ fontSize: 15, fontWeight: 700, color: accent, margin: "0 0 2px 0" }}>
-          {policy.name}
+          {policy.jsonb_data?.plan_name || policy.name || policy.details || "Unnamed Policy"}
         </p>
       </div>
 
       {/* Body */}
-      <div style={{ padding: "16px 18px", overflowY: "auto", maxHeight: 360 }}>
-        {paras.map((para, i) => (
-          <p key={i} style={{
-            fontSize: 13,
-            lineHeight: 1.8,
-            color: i === 0 ? TEXT : TEXT_SUB,
-            fontWeight: i === 0 ? 500 : 400,
-            margin: i < paras.length - 1 ? "0 0 12px 0" : 0,
-          }}>
-            {para}
-          </p>
-        ))}
+      <div style={{ padding: "16px 18px", overflowY: "auto", maxHeight: 500 }}>
+        {renderContent(analysis)}
       </div>
     </div>
   );
@@ -294,36 +249,89 @@ function EmptyPanel({ label }) {
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
-export default function PolicyCompare() {
-  const [p1Id,     setP1Id]     = useState(null);
-  const [p2Id,     setP2Id]     = useState(null);
-  const [loading,  setLoading]  = useState(false);
-  const [analysed, setAnalysed] = useState(false);
+export default function PolicyCompare({ policies = [] }) {
+  const [p1Id, p1SetId] = useState(null);
+  const [p2Id, p2SetId] = useState(null);
+  const compareMutation = useComparePolicies();
 
-  const p1 = POLICIES.find((p) => p.id === p1Id) || null;
-  const p2 = POLICIES.find((p) => p.id === p2Id) || null;
+  const p1 = policies.find((p) => p.id === p1Id) || null;
+  const p2 = policies.find((p) => p.id === p2Id) || null;
 
-  const canRun = !!p1Id || !!p2Id;
-
-  const handleP1Change = (id) => { setP1Id(id); setAnalysed(false); };
-  const handleP2Change = (id) => { setP2Id(id); setAnalysed(false); };
+  const canRun = !!p1Id && !!p2Id;
 
   const handleRun = () => {
-    if (!canRun || loading) return;
-    setAnalysed(false);
-    setLoading(true);
+    if (!canRun || compareMutation.isPending) return;
+    compareMutation.mutate({
+      old_policy_id: p1Id,
+      new_policy_id: p2Id
+    });
   };
+
+  // Extract results from nested JSON
+  const results = React.useMemo(() => {
+    if (!compareMutation.isSuccess || !compareMutation.data) return null;
+    try {
+      const resp = compareMutation.data;
+      console.log("Original Comparison Response:", resp);
+      
+      let innerStr = resp.assistant_response;
+      if (!innerStr) return null;
+
+      if (typeof innerStr === 'string') {
+        // Aggressively clean the string to make it valid JSON
+        // The backend seems to send double braces {{ }} instead of { }
+        let cleaned = innerStr.trim();
+        
+        // Replace double braces with single braces globally if they appear to be defining objects
+        // We do this cautiously but effectively for this specific format
+        cleaned = cleaned.replace(/{{/g, '{').replace(/}}/g, '}');
+        
+        try {
+          const inner = JSON.parse(cleaned);
+          const content = inner.assistant_response || inner;
+          
+          if (content && (content.old || content.new)) {
+            return {
+              old: content.old || null,
+              new: content.new || null
+            };
+          }
+        } catch (innerErr) {
+          console.warn("JSON.parse failed on cleaned string, trying fallback...", innerErr);
+          
+          // Fallback: Try to manually extract old and new strings using regex if JSON.parse fails
+          const oldMatch = cleaned.match(/"old":\s*"([\s\S]*?)"(?=,\s*"new"|})/);
+          const newMatch = cleaned.match(/"new":\s*"([\s\S]*?)"(?=,\s*"guidance"|})/);
+          
+          if (oldMatch || newMatch) {
+            return {
+              old: oldMatch ? oldMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : null,
+              new: newMatch ? newMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : null
+            };
+          }
+        }
+      } else if (typeof innerStr === 'object') {
+        const content = innerStr.assistant_response || innerStr;
+        return {
+          old: content?.old || null,
+          new: content?.new || null
+        };
+      }
+      return null;
+    } catch (e) {
+      console.error("Overall parsing failed:", e);
+      return null;
+    }
+  }, [compareMutation.isSuccess, compareMutation.data]);
 
   return (
     <div style={{ padding: "28px 32px", background: BG, minHeight: "100%" }}>
 
-      {/* ── Page title ───────────────────────────────────────────────────── */}
       <div style={{ marginBottom: 22 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
           <h2 style={{ fontSize: 20, fontWeight: 800, color: TEXT, margin: 0, letterSpacing: "-0.02em" }}>
             Compare Health Policies
           </h2>
-          
         </div>
         <p style={{ fontSize: 13, color: TEXT_SUB, margin: 0 }}>
           Pick any two policies from the dropdowns below and run an AI-powered side-by-side analysis.
@@ -351,10 +359,11 @@ export default function PolicyCompare() {
         }}>
           {/* Policy 1 */}
           <PolicyDropdown
-            label="Policy 1"
+            label="Current Policy"
             value={p1Id}
-            onChange={handleP1Change}
+            onChange={(id) => { p1SetId(id); compareMutation.reset(); }}
             exclude={p2Id}
+            policies={policies}
           />
 
           {/* VS badge */}
@@ -372,10 +381,11 @@ export default function PolicyCompare() {
 
           {/* Policy 2 */}
           <PolicyDropdown
-            label="Policy 2"
+            label="New Policy"
             value={p2Id}
-            onChange={handleP2Change}
+            onChange={(id) => { p2SetId(id); compareMutation.reset(); }}
             exclude={p1Id}
+            policies={policies}
           />
         </div>
 
@@ -383,12 +393,15 @@ export default function PolicyCompare() {
         <div style={{ padding: "20px 24px" }}>
 
           {/* Loader */}
-          {loading && (
-            <FakeLoader onDone={() => { setLoading(false); setAnalysed(true); }} />
+          {compareMutation.isPending && (
+            <div style={{ padding: "48px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
+               <BouncingLoader />
+               <p style={{ fontSize: 14, fontWeight: 700, color: PURPLE }}>Analyzing policies...</p>
+            </div>
           )}
 
           {/* Idle placeholder */}
-          {!loading && !analysed && (
+          {!compareMutation.isPending && !compareMutation.isSuccess && (
             <div style={{
               display: "flex", flexDirection: "column", alignItems: "center",
               padding: "40px 20px", gap: 12,
@@ -407,28 +420,46 @@ export default function PolicyCompare() {
                 Select policies to compare
               </p>
               <p style={{ fontSize: 12, color: TEXT_SUB, margin: 0, textAlign: "center" }}>
-                Use the dropdowns above to choose one or two health policies, then click Run AI Analysis.
+                Use the dropdowns above to choose your current and a new health policy, then click Run AI Analysis.
               </p>
             </div>
           )}
 
           {/* Results — side by side */}
-          {!loading && analysed && (
-            <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-              {p1
-                ? <AnalysisPanel policy={p1} accent={PURPLE} />
-                : <EmptyPanel label="No policy selected" />
-              }
-              {p2
-                ? <AnalysisPanel policy={p2} accent="#0891b2" />
-                : <EmptyPanel label="No second policy selected" />
-              }
-            </div>
+          {!compareMutation.isPending && compareMutation.isSuccess && (
+            results ? (
+              <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+                <AnalysisPanel 
+                  label="Current Policy Study"
+                  policy={p1} 
+                  analysis={results.old} 
+                  accent={PURPLE} 
+                />
+                <AnalysisPanel 
+                  label="New Policy Comparison"
+                  policy={p2} 
+                  analysis={results.new} 
+                  accent="#0891b2" 
+                />
+              </div>
+            ) : (
+              <div style={{ padding: "24px", color: "#b91c1c", background: "#fef2f2", borderRadius: "12px", border: "1px solid #fee2e2", textAlign: "center" }}>
+                <p style={{ fontWeight: 700 }}>Data Parsing Error</p>
+                <p style={{ fontSize: 12 }}>The AI response was received but couldn't be displayed. Please check the logs or try again.</p>
+              </div>
+            )
+          )}
+          
+          {compareMutation.isError && (
+             <div style={{ padding: "20px", color: "#b91c1c", background: "#fef2f2", borderRadius: "12px", border: "1px solid #fee2e2", textAlign: "center" }}>
+               <p style={{ fontWeight: 700 }}>Comparison Failed</p>
+               <p style={{ fontSize: 12 }}>Please try again later.</p>
+             </div>
           )}
         </div>
 
         {/* ── Footer — Run / Re-run button ─────────────────────────────── */}
-        {!loading && canRun && (
+        {!compareMutation.isPending && canRun && (
           <div style={{
             borderTop: `1px solid ${BORDER}`,
             padding: "14px 24px",
@@ -450,8 +481,7 @@ export default function PolicyCompare() {
               onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.87")}
               onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
             >
-             
-              {analysed ? "Re-run AI Analysis" : "Run AI Comparison Analysis"}
+              {compareMutation.isSuccess ? "Re-run AI Analysis" : "Run AI Comparison Analysis"}
             </button>
           </div>
         )}

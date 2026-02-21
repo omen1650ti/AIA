@@ -57,7 +57,7 @@ function InsurancePage() {
             </div>
           </div>
 
-          <PolicyCompare />
+          <PolicyCompare policies={policiesData} />
         </div>
       </div>
     </div>

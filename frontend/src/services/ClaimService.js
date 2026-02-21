@@ -1,30 +1,17 @@
 import { postAPI } from './Axios';
 
-// Mock service for claim analysis
+// Real service for claim analysis using multi-file upload
 export const analyzeClaim = async (claimData) => {
-  // Artificial delay to show the cycling loader messages (requested for ~2.5 mins experience)
-  // For demo purposes, we cycle for 15 seconds
-  await new Promise(resolve => setTimeout(resolve, 15000));
+  const formData = new FormData();
   
-  return {
-    id: "CLM-" + Math.random().toString(36).substr(2, 9).toUpperCase(),
-    timestamp: new Date().toISOString(),
-    status: "Highly Likely",
-    score: 88,
-    analysis: [
-      "All 5 required documents (Aadhar, Plan, Discharge, Medical Cert, Bill) verified.",
-      "Aadhar Card verified for identity verification.",
-      "Policy coverage matches the reported claim type.",
-      "Incident timestamp is within the active policy period.",
-      "Medical records correctly reflect the reported injuries.",
-      "All bills have been cross-verified with policy limits."
-    ],
-    recommendations: [
-      "Standard processing recommended.",
-      "Ensure all signatures on the claim form are legible.",
-      "The claim is ready for final submission."
-    ]
-  };
+  // The backend expects an array of files under the key 'files'
+  if (claimData.docs) {
+    Object.values(claimData.docs).forEach(file => {
+      if (file) formData.append('files', file);
+    });
+  }
+  
+  return await postAPI('/v1/extraction/upload', formData);
 };
 
 export const uploadClaimDocument = async (file) => {

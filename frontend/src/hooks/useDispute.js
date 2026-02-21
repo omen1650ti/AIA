@@ -13,7 +13,8 @@ export const useDispute = () => {
       const response = await submitDispute(data);
       setResult(response);
     } catch (err) {
-      setError("Failed to analyze dispute. Please try again.");
+      console.error("Dispute Analysis Error:", err);
+      setError("Failed to analyze dispute documents. Please ensure both files are valid.");
     } finally {
       setLoading(false);
     }

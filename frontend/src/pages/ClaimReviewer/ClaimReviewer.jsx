@@ -31,9 +31,11 @@ function ClaimReviewer() {
   return (
     <div style={{
       padding: "40px 32px",
-      maxWidth: "1000px",
+      maxWidth: "1300px",
       margin: "0 auto",
-      color: S.text
+      color: S.text,
+      height: "100%",
+      overflowY: "auto"
     }}>
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontSize: 32, fontWeight: 800, margin: "0 0 8px 0" }}>Claim Reviewer</h1>
@@ -42,11 +44,11 @@ function ClaimReviewer() {
         </p>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
-        {/* Left Column: Uploads */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+        {/* Uploads Section */}
         <div>
           <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20 }}>Required Documents</h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             {REQUIRED_DOCS.map(doc => (
               <DocumentUpload 
                 key={doc} 
@@ -61,35 +63,38 @@ function ClaimReviewer() {
             onClick={handleRunAnalysis}
             disabled={!allDocsUploaded || isPending}
             style={{
-              marginTop: 24,
+              marginTop: 32,
               width: "100%",
-              padding: "16px",
+              padding: "18px",
               background: allDocsUploaded ? S.purpleGrad : "#e2e8f0",
               color: allDocsUploaded ? "white" : "#94a3b8",
               border: "none",
-              borderRadius: 12,
+              borderRadius: 14,
               fontSize: 16,
               fontWeight: 700,
               cursor: allDocsUploaded ? "pointer" : "not-allowed",
-              transition: "all 0.2s"
+              transition: "all 0.2s",
+              boxShadow: allDocsUploaded ? "0 4px 15px rgba(124,58,237,0.25)" : "none"
             }}
           >
-            {isPending ? "Analyzing Claim..." : "Run AI Analysis"}
+            {isPending ? "Analyzing Claim Documents..." : "Run Comprehensive AI Audit"}
           </button>
         </div>
 
-        {/* Right Column: Results */}
-        <div>
-          <AnalysisResult 
-            result={analysisResult} 
-            isLoading={isPending} 
-            isSuccess={isSuccess}
-            onReset={() => {
-                setUploadedDocs({});
-                reset();
-            }}
-          />
-        </div>
+        {/* Results Section */}
+        { (isPending || isSuccess) && (
+          <div style={{ width: "100%", marginTop: 16 }}>
+            <AnalysisResult 
+              result={analysisResult} 
+              isLoading={isPending} 
+              isSuccess={isSuccess}
+              onReset={() => {
+                  setUploadedDocs({});
+                  reset();
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

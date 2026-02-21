@@ -43,7 +43,7 @@ const MY_POLICIES = [
     aiMatch: 95,
     highlight: "Instantly doubles base sum insured upon purchase",
     color: "#0ea5e9",
-    isMyPolicy: true
+    isMyPolicyChat: true
   },
   {
     id: "62963426202600",
@@ -75,7 +75,7 @@ const MY_POLICIES = [
     aiMatch: 89,
     highlight: "Pay premiums as per your entry age till a claim is paid",
     color: "#8b5cf6",
-    isMyPolicy: true
+    isMyPolicyChat: true
   }
 ];
 
@@ -368,7 +368,7 @@ const PolicyDetails = () => {
         {/* Navigation Header */}
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <button
-            onClick={() => navigate(`/policies?tab=${policyData?.isMyPolicy ? "mine" : "all"}`)}
+            onClick={() => navigate(`/policies?tab=${policyData?.isMyPolicyChat ? "mine" : "all"}`)}
             style={{
               padding: "8px",
               borderRadius: "50%",

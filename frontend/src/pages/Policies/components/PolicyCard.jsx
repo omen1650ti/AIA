@@ -7,7 +7,7 @@ import {
   IndianRupee,
 } from "lucide-react";
 
-const PolicyCard = ({ policy, onClick }) => {
+const PolicyCard = ({ policy, onClick, isMyPolicyChat }) => {
   const { jsonb_data, base_price } = policy;
   const features = jsonb_data?.features || {};
 
