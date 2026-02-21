@@ -146,7 +146,7 @@ const PolicyDetails = () => {
   const { policyId } = useParams();
   const [billAmount, setBillAmount] = useState("2,50,000");
   const [isSimpleView, setIsSimpleView] = useState(true);
-  const { data: policyData, isLoading, isError } = useGetPolicyDetail("3085e922-6fe2-4fa5-9a5b-6012f9945eac");
+  const { data: policyData, isLoading, isError } = useGetPolicyDetail(policyId);
 
   // Use policyData?.jsonb_data for convenience
   const data = policyData?.jsonb_data;

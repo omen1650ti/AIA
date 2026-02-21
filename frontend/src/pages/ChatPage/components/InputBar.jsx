@@ -28,7 +28,6 @@ const InputBar = React.memo(({ input, setInput, onSend, isTyping, inputRef }) =>
           transition:   "box-shadow 0.2s",
         }}
       >
-        <Mic size={15} style={{ color: T.purpleMid, flexShrink: 0 }} />
 
         <input
           ref={inputRef}

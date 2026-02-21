@@ -4,6 +4,7 @@ import MainLayout from "./components/MainLayout";
 import InsurancePage from "./pages/InsurancePage/InsurancePage";
 import PolicyDetails from "./pages/PolicyDetails/PolicyDetails";
 import ClaimReviewer from "./pages/ClaimReviewer/ClaimReviewer";
+import Policies from "./pages/Policies/Policies";
 
 
 const App = () => {
@@ -12,7 +13,7 @@ const App = () => {
       <Route path="/" element={<MainLayout />}>
         <Route index element={<InsurancePage />} />
         <Route path="insurance-page" element={<InsurancePage />} />
-        {/* <Route path="policies" element={<Policy />} /> */}
+        <Route path="policies" element={<Policies />} />
 
 
         <Route path="policy-details/:policyId" element={<PolicyDetails />} />
