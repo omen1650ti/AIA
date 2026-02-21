@@ -10,6 +10,72 @@ import PageHeader from "../InsurancePage/components/PageHeader";
 import { useGetPolicyDetail } from "../../hooks/usePolicyDetails";
 import BouncingLoader from "../../components/BouncingLoader";
 
+// Hardcoded My Policies data from USER JSON
+const MY_POLICIES = [
+  {
+    id: "29182736455001",
+    plan_name: "Optima Secure",
+    insurer: "HDFC ERGO General Insurance Company Limited",
+    jsonb_data: {
+      plan_name: "Optima Secure",
+      plan_type: "Individual",
+      claim_settlement_ratio_percent: 99,
+      cashless_hospitals: 12000,
+      existing_waiting_period_yrs: 3,
+      features: {
+        secure_benefit: true,
+        plus_benefit: true,
+        restore_benefit: true,
+        protect_benefit: true,
+        cashless_hospitals: 12000,
+        claim_settlement_ratio_percent: 99
+      },
+      tiers: [
+        { label: "Silver", price: 10620, coverage: "5 Lakhs" },
+        { label: "Gold", price: 12450, coverage: "10 Lakhs" },
+        { label: "Platinum", price: 15600, coverage: "20 Lakhs" }
+      ]
+    },
+    base_price: 10620,
+    status: "Active",
+    aiMatch: 95,
+    highlight: "Instantly doubles base sum insured upon purchase",
+    color: "#0ea5e9",
+    isMyPolicy: true
+  },
+  {
+    id: "62963426202600",
+    plan_name: "ReAssure 3.0",
+    insurer: "Niva Bupa Health Insurance Company Limited",
+    jsonb_data: {
+      plan_name: "ReAssure 3.0",
+      plan_type: "Individual",
+      claim_settlement_ratio_percent: 96,
+      cashless_hospitals: 10000,
+      existing_waiting_period_yrs: 3,
+      features: {
+        reassure_forever: true,
+        booster_plus: true,
+        lock_the_clock: true,
+        live_healthy: true,
+        cashless_hospitals: 10000,
+        claim_settlement_ratio_percent: 96
+      },
+      tiers: [
+        { label: "Base", price: 5973, coverage: "5 Lakhs" },
+        { label: "Comfort", price: 7200, coverage: "10 Lakhs" },
+        { label: "Elite", price: 9500, coverage: "20 Lakhs" }
+      ]
+    },
+    base_price: 5973,
+    status: "Active",
+    aiMatch: 89,
+    highlight: "Pay premiums as per your entry age till a claim is paid",
+    color: "#8b5cf6",
+    isMyPolicy: true
+  }
+];
+
 // Custom Icons for this page
 const FirstAidIcon = () => (
   <svg
@@ -146,7 +212,12 @@ const PolicyDetails = () => {
   const { policyId } = useParams();
   const [billAmount, setBillAmount] = useState("2,50,000");
   const [isSimpleView, setIsSimpleView] = useState(true);
-  const { data: policyData, isLoading, isError } = useGetPolicyDetail(policyId);
+  const { data: apiPolicyData, isLoading, isError } = useGetPolicyDetail(policyId);
+
+  // Check if it's a hardcoded policy
+  const hardcodedPolicy = React.useMemo(() => MY_POLICIES.find(p => p.id === policyId), [policyId]);
+  
+  const policyData = hardcodedPolicy || apiPolicyData;
 
   // Use policyData?.jsonb_data for convenience
   const data = policyData?.jsonb_data;
@@ -211,7 +282,7 @@ const PolicyDetails = () => {
     }
   }, [data, selectedTier]);
 
-  if (isLoading) {
+  if (isLoading && !hardcodedPolicy) {
     return (
       <div className="flex justify-center items-center h-screen">
         <BouncingLoader />
@@ -219,7 +290,8 @@ const PolicyDetails = () => {
     );
   }
 
-  if (isError || !policyData) {
+  // Ensure isError only triggers if not hardcoded
+  if ((isError || !policyData) && !hardcodedPolicy) {
     return (
       <div className="flex justify-center items-center h-screen text-gray-500">
         <div className="text-center">

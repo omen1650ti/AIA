@@ -37,8 +37,14 @@ function ChatPage({ filters, setFilters }) {
       setMessages((prev) => [...prev, { id: userMsgId, role: "user", content: text }]);
       setIsTyping(true);
 
+      const searchParams = new URLSearchParams(window.location.search);
+      const isMyPolicy = window.location.pathname === "/policies" && searchParams.get("tab") === "mine";
+
       try {
-        const res  = await axios.post("/api/chat", { message: text });
+        const res  = await axios.post("/api/chat", { 
+          message: text,
+          isMyPolicy: isMyPolicy
+        });
         const data = res.data;
 
         if (data.type === "guidance") {
