@@ -55,21 +55,27 @@ function DisputePage() {
     </div>
   );
 
+  const formatEmail = (text) => {
+    if (!text) return "";
+    // Remove markdown bold syntax **
+    return text.replace(/\*\*/g, "");
+  };
+
   return (
     <div className="flex flex-col h-full bg-[#fafbfc] w-full overflow-hidden">
       {/* Header */}
       <div className="w-full bg-white border-b border-slate-100 px-8 py-8 shrink-0">
-        <div className="max-w-5xl mx-auto w-full">
+        <div className="max-w-4xl mx-auto w-full">
           <h1 className="text-3xl font-extrabold text-slate-900 m-0">Dispute Analysis</h1>
           <p className="text-slate-500 mt-2 text-lg">
-            Upload your claim and rejection documents to generate a formal dispute email with AI analysis.
+            Upload your plan and bill documents to generate a formal dispute email with AI analysis.
           </p>
         </div>
       </div>
 
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto w-full flex flex-col items-center pt-8 pb-12">
-        <div className="w-full max-w-5xl px-4 flex flex-col gap-8">
+        <div className="w-full max-w-4xl px-4 flex flex-col gap-8">
           
           {!result ? (
             <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
@@ -127,7 +133,7 @@ function DisputePage() {
                 {/* Optional Description */}
                 <div className="flex flex-col gap-3">
                   <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                    Context 
+                Issue
                   </label>
                   <textarea
                     className="w-full h-24 p-4 border border-slate-200 rounded-2xl text-slate-800 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 outline-none transition-all resize-none font-sans text-sm"
@@ -166,60 +172,77 @@ function DisputePage() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               
-              {/* Left Column: Email Result */}
-              <div className="lg:col-span-4 flex flex-col gap-6">
-                <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm h-full">
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className="p-3 bg-green-100 rounded-full">
-                      <CheckCircle2 className="text-green-600" size={28} />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-slate-900">Analysis Complete</h2>
-                      <p className="text-slate-500">Professional dispute template generated.</p>
-                    </div>
+              <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm w-full">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="p-3 bg-green-100 rounded-full">
+                    <CheckCircle2 className="text-green-600" size={28} />
                   </div>
-
-                  <div className="bg-slate-900 rounded-3xl p-8 relative group overflow-hidden shadow-2xl">
-                     <div className="absolute top-0 left-0 w-1.5 h-full bg-indigo-500" />
-                     <pre className="text-slate-300 font-sans whitespace-pre-wrap leading-relaxed text-[15px]">
-                       {result.dispute_mail}
-                     </pre>
+                  <div>
+                    <h2 className="text-2xl font-bold text-slate-900">Analysis Complete</h2>
+                    <p className="text-slate-500">Professional dispute template generated.</p>
                   </div>
+                </div>
 
-                  <div className="flex items-center gap-4 mt-8">
-                    <button
-                      onClick={handleCopy}
-                      className="flex-1 py-4 px-6 rounded-2xl font-extrabold flex items-center justify-center gap-3 transition-all active:scale-[0.95] border-2 border-slate-100 hover:bg-slate-50 text-slate-700"
-                    >
-                      {isCopied ? <CheckCircle2 size={20} className="text-green-500" /> : <Copy size={20} />}
-                      {isCopied ? "Copied!" : "Copy Text"}
-                    </button>
-                    <button
-                      onClick={handleOpenGmail}
-                      className="flex-1 py-4 px-6 rounded-2xl font-extrabold flex items-center justify-center gap-3 transition-all active:scale-[0.95] bg-indigo-600 text-white hover:bg-indigo-700 shadow-xl shadow-indigo-100"
-                    >
-                      <Mail size={20} />
-                      Send via Gmail
-                    </button>
-                  </div>
+                <div className="bg-slate-900 rounded-3xl p-8 relative group overflow-hidden shadow-2xl">
+                   <div className="absolute top-0 left-0 w-1.5 h-full bg-indigo-500" />
+                   <pre className="text-slate-300 font-sans whitespace-pre-wrap leading-relaxed text-[15px]">
+                     {formatEmail(result.dispute_mail)}
+                   </pre>
+                </div>
 
+                <div className="flex items-center gap-4 mt-8">
                   <button
-                    onClick={() => {
-                      setClaimFile(null);
-                      setRejectionFile(null);
-                      resetDispute();
-                    }}
-                    className="w-full mt-6 py-3 text-slate-400 font-bold hover:text-slate-600 transition-colors text-sm"
+                    onClick={handleCopy}
+                    className="flex-1 py-4 px-6 rounded-2xl font-extrabold flex items-center justify-center gap-3 transition-all active:scale-[0.95] border-2 border-slate-100 hover:bg-slate-50 text-slate-700"
                   >
-                    Start New Analysis
+                    {isCopied ? <CheckCircle2 size={20} className="text-green-500" /> : <Copy size={20} />}
+                    {isCopied ? "Copied!" : "Copy Text"}
+                  </button>
+                  <button
+                    onClick={handleOpenGmail}
+                    className="flex-1 py-4 px-6 rounded-2xl font-extrabold flex items-center justify-center gap-3 transition-all active:scale-[0.95] bg-indigo-600 text-white hover:bg-indigo-700 shadow-xl shadow-indigo-100"
+                  >
+                    <Mail size={20} />
+                    Send via Gmail
                   </button>
                 </div>
+
+                {/* Hardcoded Next Steps Card */}
+                <div className="mt-8 p-6 bg-slate-50 rounded-2xl border border-slate-200">
+                  <h4 className="text-base font-black text-slate-900 mb-4 flex items-center gap-2">
+                    <CheckCircle2 size={18} className="text-indigo-600" />
+                    What should I do next?
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="flex flex-col gap-2">
+                      <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-black">1</div>
+                      <p className="text-xs text-slate-600 font-bold">Review the email and fill in any bracketed information [like dates].</p>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-black">2</div>
+                      <p className="text-xs text-slate-600 font-bold">Attach your primary Plan Document and the Hospital Bill to the email.</p>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-black">3</div>
+                      <p className="text-xs text-slate-600 font-bold">Send to your insurer's grievance cell and track the reference number.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setClaimFile(null);
+                    setRejectionFile(null);
+                    resetDispute();
+                  }}
+                  className="w-full mt-8 py-3 text-slate-400 font-bold hover:text-slate-600 transition-colors text-sm"
+                >
+                  Start New Analysis
+                </button>
               </div>
 
-              {/* Right Column: Extracted Data */}
-            
             </div>
           )}
         </div>

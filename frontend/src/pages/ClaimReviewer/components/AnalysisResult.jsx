@@ -82,13 +82,15 @@ function AnalysisResult({ result, isLoading, isSuccess, onReset }) {
       let headerStyle = { fontSize: 18, fontWeight: 800, margin: "24px 0 12px 0", color: S.text };
       let subHeaderStyle = { fontSize: 15, fontWeight: 700, margin: "16px 0 8px 0", color: S.purple };
 
+      const cleanLine = line.replace(/\*\*/g, "");
+
       if (line.startsWith("### ")) {
-        const title = line.replace("### ", "");
+        const title = cleanLine.replace("### ", "");
         return <h3 key={i} style={headerStyle}>{title}</h3>;
       }
       
       if (line.startsWith("#### ")) {
-        const title = line.replace("#### ", "");
+        const title = cleanLine.replace("#### ", "");
         const isRedFlag = title.toLowerCase().includes("red flag") || title.toLowerCase().includes("inconsistency");
         const isRecommendation = title.toLowerCase().includes("recommendation");
         const isClearMatch = title.toLowerCase().includes("clear match");
@@ -113,13 +115,13 @@ function AnalysisResult({ result, isLoading, isSuccess, onReset }) {
         return (
           <div key={i} style={{ display: "flex", gap: 8, margin: "8px 0", fontSize: 13, lineHeight: 1.5 }}>
             <span style={{ color: isAlert ? "#dc2626" : S.purple, marginTop: 4 }}>•</span>
-            <span><strong style={{ color: isAlert ? "#991b1b" : S.text }}>{parts[1]}</strong>{parts.slice(2).join("")}</span>
+            <span><strong style={{ color: isAlert ? "#991b1b" : S.text }}>{parts[1]}</strong>{parts.slice(2).join("").replace(/\*\*/g, "")}</span>
           </div>
         );
       }
-      if (line.startsWith("  - ")) return <div key={i} style={{ marginLeft: 20, fontSize: 13, color: S.textSub, margin: "4px 0" }}>• {line.replace("  - ", "")}</div>;
+      if (line.startsWith("  - ")) return <div key={i} style={{ marginLeft: 20, fontSize: 13, color: S.textSub, margin: "4px 0" }}>• {cleanLine.replace("  - ", "")}</div>;
       if (line.trim() === "") return <div key={i} style={{ height: 8 }} />;
-      return <p key={i} style={{ fontSize: 13, color: S.textSub, margin: "4px 0", lineHeight: 1.6 }}>{line}</p>;
+      return <p key={i} style={{ fontSize: 13, color: S.textSub, margin: "4px 0", lineHeight: 1.6 }}>{cleanLine}</p>;
     });
   };
 
@@ -130,7 +132,7 @@ function AnalysisResult({ result, isLoading, isSuccess, onReset }) {
         {Object.entries(data).map(([key, val]) => (
           <div key={key} style={{ fontSize: 12 }}>
             <span style={{ color: S.textSub, fontWeight: 500 }}>{key}</span>
-            <div style={{ color: S.text, fontWeight: 600, marginTop: 2 }}>{String(val)}</div>
+            <div style={{ color: S.text, fontWeight: 600, marginTop: 2 }}>{String(val).replace(/\*\*/g, "")}</div>
           </div>
         ))}
       </div>

@@ -31,7 +31,7 @@ function ClaimReviewer() {
   return (
     <div style={{
       padding: "40px 32px",
-      maxWidth: "1300px",
+      maxWidth: "1800px",
       margin: "0 auto",
       color: S.text,
       height: "100%",
