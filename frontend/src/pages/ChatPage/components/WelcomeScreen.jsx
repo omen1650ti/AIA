@@ -38,7 +38,7 @@ const WelcomeScreen = React.memo(({ onSend }) => {
             boxShadow: T.shadow.bubble,
           }}
         >
-          Hello! I'm your AIA assistant. I can help you find the perfect
+          Hello! I'm your   assistant. I can help you find the perfect
           insurance policy, explain complex terms, or analyze your current
           coverage. How can I assist you today?
         </motion.div>
