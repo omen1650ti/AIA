@@ -255,10 +255,11 @@ class SupervisorAgentManager:
     def __init__(self, memory=None):
 
         self.llm = init_chat_model(
-            model="azure_openai:gpt-4o-mini",
-            azure_endpoint=settings.ENDPOINT,
-            api_key=settings.SUBSCRIPTION_KEY,
-            api_version=settings.API_VERSION,
+            model="gpt-4o-mini",
+            model_provider="azure_openai",
+            azure_endpoint=settings.AZURE_OPENAI_ENDPOINT or settings.ENDPOINT,
+            api_key=settings.AZURE_OPENAI_API_KEY or settings.SUBSCRIPTION_KEY,
+            api_version=settings.AZURE_OPENAI_API_VERSION or settings.API_VERSION,
             temperature=0.7,
         )
 
@@ -266,7 +267,7 @@ class SupervisorAgentManager:
         # Instantiate specialized agents (logical wrappers)
         self.curation_agent = CurationAgent(checkpointer=self.memory)
         self.policy_agent = PolicyAgent(checkpointer=self.memory)
-        self.dispute_agent = DisputeAgent(checkpointer=self.memory)
+        # self.dispute_agent = DisputeAgent(checkpointer=self.memory)
 
         # Create ReAct graphs for each specialist and attach to agent wrappers
         try:
@@ -292,7 +293,7 @@ class SupervisorAgentManager:
             # Attach graphs to agent wrappers
             self.curation_agent.graph = self.curation_graph
             self.policy_agent.graph = self.policy_graph
-            self.dispute_agent.graph = self.dispute_graph
+            # self.dispute_agent.graph = self.dispute_graph
             print("Attached ReAct graphs to agent wrappers")
 
             # Ensure agents have names for the supervisor
@@ -327,7 +328,7 @@ class SupervisorAgentManager:
             )
             self.curation_graph = None
             self.policy_graph = None
-            self.dispute_graph = None
+            # self.dispute_graph = None
             self.supervisor = None
 
     def _extract_response(self, output: Any) -> Dict[str, Any]:
@@ -540,6 +541,7 @@ async def run_agent(
     is_dispute: Optional[bool] = False,
     is_policy_check: Optional[bool] = False,
     is_my_policies_chat: Optional[bool] = False,
+    is_guidance: Optional[bool] = False,
 ) -> Dict[str, Any]:
     """Execute the supervisor agent with user input and return response.
 
@@ -567,22 +569,47 @@ async def run_agent(
     if is_dispute:
         # If the message is related to a dispute, directly invoke the dispute agent
         print("Routing to DisputeAgent based on is_dispute flag")
-        dispute_agent = DisputeAgent()
+        manager = await get_agent_manager()
         config = {
             "configurable": {"thread_id": thread_id, "user_profile": user_profile or {}}
         }
         # TODO call the document analysis functionality here to extract relevant info from attachments and include it as a user message or context for the dispute agent
-        return await dispute_agent.run(user_message, attachments, config)
+        agent_result = await manager.dispute_agent.run(user_message, attachments, config)
+        extracted = manager._extract_response(agent_result)
+        return {
+            "thread_id": thread_id,
+            "assistant_response": extracted["assistant_response"],
+            "guidance": extracted["guidance"],
+        }
+    elif is_guidance:
+        print("Routing to CurationAgent based on is_guidance flag")
+        manager = await get_agent_manager()
+        config = {
+            "configurable": {"thread_id": thread_id, "user_profile": user_profile or {}}
+        }
+        agent_result = await manager.curation_agent.run({"message": user_message}, config)
+        extracted = manager._extract_response(agent_result)
+        return {
+            "thread_id": thread_id,
+            "assistant_response": extracted["assistant_response"],
+            "guidance": extracted["guidance"],
+        }
     elif is_policy_check or is_my_policies_chat:
         print(
             "Routing to PolicyAgent based on is_policy_check or is_my_policies_chat flag"
         )
         # If the message is related to a policy check, directly invoke the policy agent
-        policy_agent = PolicyAgent()
+        manager = await get_agent_manager()
         config = {
             "configurable": {"thread_id": thread_id, "user_profile": user_profile or {}}
         }
-        return await policy_agent.run(user_message, attachments, config)
+        agent_result = await manager.policy_agent.run(user_message, attachments, config)
+        extracted = manager._extract_response(agent_result)
+        return {
+            "thread_id": thread_id,
+            "assistant_response": extracted["assistant_response"],
+            "guidance": extracted["guidance"],
+        }
 
     print("Routing to SupervisorAgentManager for general query handling")
     agent = await get_agent_manager()

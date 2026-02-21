@@ -21,4 +21,3 @@ langsmith
 langchain-openai
 pinecone[asyncio]
 pinecone
-sentence-transformers
