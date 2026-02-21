@@ -83,16 +83,17 @@ function NavBar() {
         </button>
         <div
           style={{
-            width: 32,
-            height: 32,
+            width: 34,
+            height: 34,
             borderRadius: "50%",
-            background: S.purpleGrad,
+            background: "#f1f5f9",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            border: "1px solid #e2e8f0",
           }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
             <circle cx="12" cy="7" r="4" />
           </svg>
