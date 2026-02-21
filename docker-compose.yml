@@ -9,8 +9,11 @@ services:
       - POSTGRES_USER=aiauser
       - POSTGRES_PASSWORD=aiapassword
       - POSTGRES_DB=aiadatabase
-    ports:
-      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aiauser -d aiadatabase"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: 
@@ -20,12 +23,22 @@ services:
       - ./backend:/app
     ports:
       - "8000:8000"
+    env_file:
+      - backend/.env
     environment:
       - DATABASE_URL=postgresql+asyncpg://aiauser:aiapassword@db:5432/aiadatabase
       - AZURE_FORM_RECOGNIZER_ENDPOINT=${AZURE_FORM_RECOGNIZER_ENDPOINT}
       - AZURE_FORM_RECOGNIZER_KEY=${AZURE_FORM_RECOGNIZER_KEY}
+      - ENDPOINT=${ENDPOINT}
+      - MODEL_NAME=${MODEL_NAME}
+      - DEPLOYMENT=${DEPLOYMENT}
+      - SUBSCRIPTION_KEY=${SUBSCRIPTION_KEY}
+      - API_VERSION=${API_VERSION}
+      - PYTHONUNBUFFERED=1
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
   frontend:
     build:

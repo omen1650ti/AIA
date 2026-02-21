@@ -1,0 +1,16 @@
+DATABASE
+--------
+
+insurance_providers -- (id, name, additional_details)
+
+plans -- (id, insurance_provider_id, details), base price
+
+
+rider table -- [id, plan id, rider name, description, price]
+
+
+user table - id username plan id status corrections
+
+
+PLANSSS
+--------

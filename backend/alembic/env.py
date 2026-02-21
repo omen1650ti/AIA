@@ -44,7 +44,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = settings.DATABASE_URL
+    url = "postgresql://aiauser:aiapassword@localhost:5432/aiadatabase"
     context.configure(
         url=url,
         target_metadata=target_metadata,

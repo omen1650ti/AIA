@@ -9,3 +9,16 @@ asyncpg
 alembic
 python-multipart
 azure-ai-formrecognizer
+openai
+psycopg[binary]
+langgraph
+langgraph-supervisor
+langgraph[postgres]
+langgraph-checkpoint-postgres
+langchain
+langchain-core
+langsmith
+langchain-openai
+pinecone[asyncio]
+pinecone
+sentence-transformers
