@@ -1,29 +1,4 @@
-import os
-from typing import List, Dict, Optional
-from uuid import uuid4
 
-from pinecone import PineconeAsyncio
-from app.core.config import settings
-from openai import AsyncAzureOpenAI
-from fastapi import APIRouter
-router = APIRouter()
-# Alternative: from openai import OpenAI (if using OpenAI embeddings)
-
-# ──────────────────────────────────────────────────────────────────────────────
-# CONFIGURATION - change these as needed
-# ──────────────────────────────────────────────────────────────────────────────
-
-PINECONE_API_KEY = settings.PINECONE_API_KEY           # required
-PINECONE_INDEX_NAME = settings.PINECONE_INDEX_NAME            # your index name
-PINECONE_NAMESPACE = settings.PINECONE_NAMESPACE             # optional, can be ""
-
-EMBEDDING_MODEL = "text-embedding-ada-002"                      # fast & good for general use
-
-
-CHUNK_SIZE = 1200          # characters
-CHUNK_OVERLAP = 200        # characters
-
-# ──────────────────────────────────────────────────────────────────────────────
 
 DOCUMENT_TEXT = """
 # Comprehensive Insurance Providers and Plans Database
@@ -815,10 +790,23 @@ This document compiles detailed information on insurance providers, their associ
 
 """
 
+from fastapi import APIRouter, Body
+from typing import Dict, List, Optional, Any
+from uuid import uuid4
+import os
+
+from pinecone import Pinecone
+from openai import AzureOpenAI
+from pydantic import BaseModel
+
+from app.core.config import settings
+
+router = APIRouter()
+
 def chunk_text(
     text: str,
-    chunk_size: int = CHUNK_SIZE,
-    chunk_overlap: int = CHUNK_OVERLAP
+    chunk_size: int = 1200,
+    chunk_overlap: int = 200
 ) -> List[str]:
     """
     Simple recursive character-based chunker with overlap.
@@ -874,55 +862,53 @@ def create_metadata_for_chunk(
         "text_length": len(chunk),
     }
 
+
 @router.post("/document")
 async def store_insurance_data_to_pinecone(
-    # full_document_text: str = DOCUMENT_TEXT,
-    index_name: str = PINECONE_INDEX_NAME,
-    namespace: str = PINECONE_NAMESPACE,
-    embedding_model_name: str = EMBEDDING_MODEL,
-    batch_size: int = 100
-) -> Dict[str, int]:
+) -> Dict[str, Any]:
     """
-    Prepare chunks from the insurance document and upsert them to Pinecone.
-
-    Returns a summary: {"total_chunks": int, "upserted": int}
+    Upsert insurance document chunks to Pinecone using Azure OpenAI embeddings
     """
-    full_document_text = DOCUMENT_TEXT  # In real use, this would come from the request body or a file upload
-    # 1. Initialize embedding model
-    print(f"Loading embedding model: {embedding_model_name}")
-    async_openai_embedding_client = AsyncAzureOpenAI(
-    api_key=settings.EMBEDDING_KEY,
-    azure_endpoint=settings.EMBEDDING_ENDPOINT,
-    api_version=settings.EMBEDDING_VERSION,
-)
+    full_document_text = DOCUMENT_TEXT
+    namespace = settings.PINECONE_NAMESPACE
+    batch_size = 100
 
-    # 2. Chunk the document
-    chunks = chunk_text(full_document_text)
-    print(f"Created {len(chunks)} chunks")
-
-    # 3. Initialize Pinecone
-    pc_asyncio = PineconeAsyncio(api_key=PINECONE_API_KEY)
-    index = pc_asyncio.IndexAsyncio(
-        host=settings.PINECONE_HOST_URL,
-        name=settings.PINECONE_INDEX_NAME,
+    # 1. Embedding client
+    embedding_client = AzureOpenAI(
+        api_key=settings.EMBEDDING_KEY,
+        azure_endpoint=settings.EMBEDDING_ENDPOINT,
+        api_version=settings.EMBEDDING_VERSION,
     )
 
-    # 4. Prepare vectors
-    vectors_to_upsert = []
-    for i, chunk in enumerate(chunks):
-        embedding = await async_openai_embedding_client.embeddings.create(
-            model="text-embedding-ada-002", input=chunk
-        ).data[0].embedding
+    # 2. Pinecone client (synchronous – recommended for most cases)
+    pc = Pinecone(api_key=settings.PINECONE_API_KEY)
+    index = pc.Index(name=settings.PINECONE_INDEX_NAME)
 
-        vector_id = str(uuid4())  # or f"chunk_{i}_{uuid4().hex[:8]}"
+    # 3. Chunking (your existing function – looks good)
+    chunks = chunk_text(full_document_text)
+
+    print(f"Created {len(chunks)} chunks")
+
+    # 4. Prepare & upsert in batches
+    vectors_to_upsert = []
+    upserted_count = 0
+
+    for i, chunk in enumerate(chunks):
+        # Get embedding
+        response = embedding_client.embeddings.create(
+            model="text-embedding-ada-002",
+            input=chunk
+        )
+        embedding = response.data[0].embedding
+
+        vector_id = str(uuid4())
 
         metadata = create_metadata_for_chunk(
             chunk=chunk,
             chunk_index=i,
             total_chunks=len(chunks),
-            # You can make this smarter by parsing provider/plan from chunk content
-            provider=None,   # ← improve by regex or simple parsing if desired
-            plan_name=None
+            document_title="Comprehensive Insurance Plans Database 2025",
+            source="internal_db_export",
         )
 
         vectors_to_upsert.append({
@@ -930,16 +916,16 @@ async def store_insurance_data_to_pinecone(
             "values": embedding,
             "metadata": {
                 **metadata,
-                "text": chunk  # ← store original text (important for RAG!)
+                "text": chunk  # important for retrieval
             }
         })
 
-        # Batch upsert
         if len(vectors_to_upsert) >= batch_size:
             index.upsert(
                 vectors=vectors_to_upsert,
                 namespace=namespace
             )
+            upserted_count += len(vectors_to_upsert)
             print(f"Upserted batch of {len(vectors_to_upsert)} vectors")
             vectors_to_upsert = []
 
@@ -949,14 +935,11 @@ async def store_insurance_data_to_pinecone(
             vectors=vectors_to_upsert,
             namespace=namespace
         )
+        upserted_count += len(vectors_to_upsert)
         print(f"Upserted final batch of {len(vectors_to_upsert)} vectors")
 
     return {
-        "total_chunks": len(chunks),
-        "upserted": len(chunks),
-        "index": index_name,
-        "namespace": namespace,
-        "embedding_dim": len(embedding),
-        "model": embedding_model_name
+        "status": "success",
+        "total_chunks": str(len(chunks)),
+        "upserted": str(upserted_count),
     }
-
